@@ -1,12 +1,12 @@
 .env
+.env.*
+!.env.example
+
+target/
+node_modules/
 
 .idea/
 .vscode/
 
-target/
-
-node_modules/
-
 *.log
-
 .DS_Store
