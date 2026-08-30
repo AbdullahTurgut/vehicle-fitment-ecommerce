@@ -1,13 +1,26 @@
 package com.carmats.catalog.service;
 
-import com.carmats.catalog.dto.response.*;
+import com.carmats.catalog.dto.response.CategoryResponse;
+import com.carmats.catalog.dto.response.ProductDetailResponse;
+import com.carmats.catalog.dto.response.ProductListResponse;
 import com.carmats.catalog.entity.Product;
 import com.carmats.catalog.entity.ProductImage;
 import com.carmats.catalog.entity.ProductStatus;
 import com.carmats.catalog.mapper.ProductMapper;
-import com.carmats.catalog.repository.*;
+import com.carmats.catalog.repository.CategoryRepository;
+import com.carmats.catalog.repository.ProductCompatibilityRepository;
+import com.carmats.catalog.repository.ProductFeatureRepository;
+import com.carmats.catalog.repository.ProductImageRepository;
+import com.carmats.catalog.repository.ProductRepository;
+import com.carmats.common.exception.BusinessException;
 import com.carmats.common.exception.NotFoundException;
+import com.carmats.common.response.PageResponse;
+import com.carmats.vehicle.entity.VehicleGeneration;
+import com.carmats.vehicle.entity.VehicleVariant;
 import com.carmats.vehicle.repository.VehicleVariantRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +54,9 @@ public class CatalogService {
         this.vehicleVariantRepository = vehicleVariantRepository;
     }
 
+    /*
+     * Aktif kategorileri listeler.
+     */
     public List<CategoryResponse> getCategories() {
 
         return categoryRepository
@@ -50,19 +66,44 @@ public class CatalogService {
                 .toList();
     }
 
-    public List<ProductListResponse> getProducts() {
+    /*
+     * Aktif ürünleri sayfalı olarak listeler.
+     * categorySlug null ise tüm aktif ürünleri getirir.
+     */
+    public PageResponse<ProductListResponse> getProducts(
+            String categorySlug,
+            int page,
+            int size
+    ) {
 
-        return productRepository
-                .findAllByStatusOrderByCreatedAtDesc(ProductStatus.ACTIVE)
-                .stream()
-                .map(this::toListResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(
+                page,
+                size
+        );
+
+        Page<ProductListResponse> products =
+                productRepository
+                        .findPublicProducts(
+                                normalizeCategorySlug(categorySlug),
+                                pageable
+                        )
+                        .map(ProductMapper::toListResponse);
+
+        return PageResponse.from(products);
     }
 
+    /*
+     * Slug değerine göre public ürün detayını getirir.
+     *
+     * Ürün ACTIVE olmalı ve kategorisi aktif olmalı.
+     */
     public ProductDetailResponse getProductBySlug(String slug) {
 
         Product product = productRepository
-                .findBySlugAndStatus(slug, ProductStatus.ACTIVE)
+                .findPublicProductBySlug(
+                        slug,
+                        ProductStatus.ACTIVE
+                )
                 .orElseThrow(() ->
                         new NotFoundException(
                                 "PRODUCT_NOT_FOUND",
@@ -73,28 +114,49 @@ public class CatalogService {
         return toDetailResponse(product);
     }
 
+    /*
+     * Araç varyantı ve model yılına göre
+     * uyumlu ürünleri getirir.
+     */
     public List<ProductListResponse> getCompatibleProducts(
             UUID variantId,
             Integer year
     ) {
 
-        if (!vehicleVariantRepository.existsByIdAndActiveTrue(variantId)) {
+        VehicleVariant variant = vehicleVariantRepository
+                .findByIdAndActiveTrue(variantId)
+                .orElseThrow(() ->
+                        new NotFoundException(
+                                "VEHICLE_VARIANT_NOT_FOUND",
+                                "Araç varyantı bulunamadı."
+                        )
+                );
 
-            throw new NotFoundException(
-                    "VEHICLE_VARIANT_NOT_FOUND",
-                    "Araç varyantı bulunamadı."
-            );
-        }
+        validateVehicleYear(
+                variant,
+                year
+        );
 
         return compatibilityRepository
-                .findCompatibleProducts(variantId, year)
+                .findCompatibleProducts(
+                        variantId,
+                        year
+                )
                 .stream()
                 .map(compatibility -> compatibility.getProduct())
-                .map(this::toListResponse)
                 .distinct()
+                .map(this::toListResponse)
                 .toList();
     }
 
+    /*
+     * Compatible products tarafında Product entity geldiği için
+     * liste response'una dönüştürür.
+     *
+     * Not:
+     * Public products endpoint'inde projection kullanıldığı için
+     * N+1 problemi orada çözülmüş durumda.
+     */
     private ProductListResponse toListResponse(Product product) {
 
         String primaryImageUrl = imageRepository
@@ -112,12 +174,17 @@ public class CatalogService {
                 product.getSku(),
                 product.getBasePrice(),
                 product.getSalePrice(),
+                product.getEffectivePrice(),
                 product.getStockQuantity(),
+                product.isInStock(),
                 primaryImageUrl,
                 product.isFeatured()
         );
     }
 
+    /*
+     * Product detail response hazırlanır.
+     */
     private ProductDetailResponse toDetailResponse(Product product) {
 
         var images = imageRepository
@@ -137,16 +204,87 @@ public class CatalogService {
                 product.getName(),
                 product.getSlug(),
                 product.getSku(),
+
                 product.getShortDescription(),
                 product.getDescription(),
+
                 product.getBasePrice(),
                 product.getSalePrice(),
+                product.getEffectivePrice(),
+
                 product.getStockQuantity(),
+                product.isInStock(),
+
                 product.getManufacturerBrand(),
                 product.getMaterial(),
-                ProductMapper.toCategoryResponse(product.getCategory()),
+
+                ProductMapper.toCategoryResponse(
+                        product.getCategory()
+                ),
+
                 images,
                 features
         );
+    }
+
+    /*
+     * Kullanıcı boş category parametresi gönderirse
+     * bunu null olarak değerlendiriyoruz.
+     *
+     * Örnek:
+     * ?category=
+     */
+    private String normalizeCategorySlug(String categorySlug) {
+
+        if (categorySlug == null) {
+            return null;
+        }
+
+        String normalized = categorySlug.trim();
+
+        if (normalized.isEmpty()) {
+            return null;
+        }
+
+        return normalized;
+    }
+
+    /*
+     * Seçilen model yılının ilgili kasa/nesil
+     * aralığında olup olmadığını kontrol eder.
+     */
+    private void validateVehicleYear(
+            VehicleVariant variant,
+            Integer year
+    ) {
+
+        if (year == null) {
+            return;
+        }
+
+        VehicleGeneration generation =
+                variant.getGeneration();
+
+        Integer startYear =
+                generation.getStartYear();
+
+        Integer endYear =
+                generation.getEndYear();
+
+        if (startYear != null && year < startYear) {
+
+            throw new BusinessException(
+                    "INVALID_VEHICLE_YEAR",
+                    "Seçilen yıl bu araç kasası için geçerli değildir."
+            );
+        }
+
+        if (endYear != null && year > endYear) {
+
+            throw new BusinessException(
+                    "INVALID_VEHICLE_YEAR",
+                    "Seçilen yıl bu araç kasası için geçerli değildir."
+            );
+        }
     }
 }

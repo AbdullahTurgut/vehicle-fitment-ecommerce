@@ -16,8 +16,10 @@ public record ProductDetailResponse(
 
         BigDecimal basePrice,
         BigDecimal salePrice,
+        BigDecimal effectivePrice,
 
         int stockQuantity,
+        boolean inStock,
 
         String manufacturerBrand,
         String material,

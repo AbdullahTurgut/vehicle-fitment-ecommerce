@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import jakarta.validation.ConstraintViolationException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -73,6 +74,46 @@ public class GlobalExceptionHandler {
                 errors,
                 LocalDateTime.now()
         );
+
+        return ResponseEntity
+                .badRequest()
+                .body(response);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleConstraintViolation(
+            ConstraintViolationException exception
+    ) {
+
+        Map<String, String> errors = new LinkedHashMap<>();
+
+        exception.getConstraintViolations()
+                .forEach(violation -> {
+
+                    String path =
+                            violation
+                                    .getPropertyPath()
+                                    .toString();
+
+                    String field =
+                            path.substring(
+                                    path.lastIndexOf('.') + 1
+                            );
+
+                    errors.put(
+                            field,
+                            violation.getMessage()
+                    );
+                });
+
+        ApiErrorResponse response =
+                new ApiErrorResponse(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "VALIDATION_ERROR",
+                        "Gönderilen bilgiler geçersiz.",
+                        errors,
+                        LocalDateTime.now()
+                );
 
         return ResponseEntity
                 .badRequest()

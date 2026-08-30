@@ -120,4 +120,18 @@ public class Product extends BaseEntity {
     public String getMaterial() {
         return material;
     }
+    @Transient
+    public BigDecimal getEffectivePrice() {
+
+        return salePrice != null
+                ? salePrice
+                : basePrice;
+    }
+
+    @Transient
+    public boolean isInStock() {
+
+        return stockQuantity > 0
+                && status == ProductStatus.ACTIVE;
+    }
 }
