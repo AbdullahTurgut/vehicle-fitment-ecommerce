@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 13 — Shipping Domain tamamlandı  
-**Sıradaki ana aşama:** Step 14 — Campaign / Coupon Domain  
+**Mevcut aşama:** ✅ Step 14 — Campaign / Coupon Domain tamamlandı  
+**Sıradaki ana aşama:** Step 15 — Review / Favorites Domain  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -627,16 +627,45 @@ Tamamlanan kargo ve gönderi özellikleri:
 
 ---
 
-# 14. Sıradaki Backend Roadmap
+# 14. Campaign / Coupon Domain (Tamamlandı)
 
-## ⏭ Step 14 — Campaign / Coupon Domain (Sıradaki Aşama)
+## ✅ Step 14 — Campaign / Coupon Domain (Tamamlandı)
+
+Tamamlanan kampanya ve kupon özellikleri:
+- ✅ Flyway `V15__create_coupon_schema.sql` (coupons ve coupon_usages tabloları, foreign key ve indexler)
+- ✅ `DiscountType` (`PERCENTAGE`, `FIXED_AMOUNT`)
+- ✅ JPA entity'leri: `Coupon.java`, `CouponUsage.java`
+- ✅ Repository katmanı: `CouponRepository.java`, `CouponUsageRepository.java`
+- ✅ DTO'lar ve `CouponMapper.java`: `CreateCouponRequest`, `UpdateCouponRequest`, `ValidateCouponRequest`, `CouponValidationResponse`, `CouponResponse`
+- ✅ `CouponService.java`:
+  - `validateCoupon`: Kupon aktifliği, tarih aralığı, minimum sepet tutarı, toplam ve kullanıcı başına kullanım limiti kontrolleri, yüzde ve sabit indirim tutarı hesaplama, maksimum indirim tavanı uygulama
+  - `recordCouponUsage`: Sipariş tamamlandığında kullanım kaydı oluşturma ve kullanım sayısını artırma
+  - Admin CRUD: `createCoupon`, `getAllCoupons`, `getCouponById`, `updateCoupon`, `updateCouponStatus`
+- ✅ REST Controller'lar:
+  - `CouponController.java` (`POST /api/v1/coupons/validate`)
+  - `AdminCouponController.java` (`POST /api/v1/admin/coupons`, `GET /api/v1/admin/coupons`, `GET /api/v1/admin/coupons/{id}`, `PUT /api/v1/admin/coupons/{id}`, `PATCH /api/v1/admin/coupons/{id}/status`)
+- ✅ `SecurityConfig.java` üzerinde `/api/v1/coupons/**` için kupon sorgulama izni ve admin kupon rotaları için `ROLE_ADMIN` zorunluluğu
+- ✅ Kapsamlı unit ve entegrasyon testleri (`CouponServiceTest`, `CouponControllerIntegrationTest`, `AdminCouponControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **135 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
+
+---
+
+# 15. Sıradaki Backend Roadmap
+
+## ⏭ Step 15 — Review / Favorites Domain (Sıradaki Aşama)
 
 Plan:
-- Kupon ve indirim veri modeli (`coupons`, `coupon_usages`, Flyway `V15__create_coupon_schema.sql`)
-- İndirim tipleri (`DiscountType`: `PERCENTAGE`, `FIXED_AMOUNT`)
-- Kupon kuralları: minimum sepet tutarı, kullanım limiti, başlangıç/bitiş tarihi, aktiflik durumu
-- Kupon sorgulama, doğrulama ve indirim hesaplama REST API (`POST /api/v1/coupons/validate`, `POST /api/v1/coupons/apply`)
-- Admin kupon yönetimi REST API (`POST /api/v1/admin/coupons`, `GET /api/v1/admin/coupons`, `PATCH /api/v1/admin/coupons/{id}/status`)
+- Ürün yorumları ve favoriler veri modeli (`product_reviews`, `favorites`, Flyway `V16__create_review_and_favorites_schema.sql`)
+- Değerlendirme durumları (`ReviewStatus`: `PENDING`, `APPROVED`, `REJECTED`)
+- Ürün yorumlama REST API'leri:
+  - `POST /api/v1/products/{productId}/reviews` (Müşteri yorum ekleme)
+  - `GET /api/v1/products/{productId}/reviews` (Ürünün onaylanmış yorumları ve puan ortalaması)
+  - `GET /api/v1/admin/reviews` (Admin yorum onay havuzu)
+  - `PATCH /api/v1/admin/reviews/{id}/status` (Admin yorum onaylama/reddetme)
+- Favoriler REST API'leri:
+  - `POST /api/v1/favorites/{productId}` (Favoriye ekleme / çıkarma toggle)
+  - `GET /api/v1/favorites` (Kullanıcının favori ürünleri listesi)
+  - `DELETE /api/v1/favorites/{productId}` (Favoriden kaldırma)
 - Unit ve entegrasyon testleri
 
 ---
@@ -1118,9 +1147,9 @@ STEP 9   Cart                              ✅
 STEP 10  Checkout                          ✅
 STEP 11  Order                             ✅
 STEP 12  Payment                           ✅
-STEP 13  Shipping                          ✅  ← TAMAMLANDI
-STEP 14  Campaign / Coupon                 ⏳  ← SIRADAKİ ANA AŞAMA
-STEP 15  Review / Favorites                ⏳
+STEP 13  Shipping                          ✅
+STEP 14  Campaign / Coupon                 ✅  ← TAMAMLANDI
+STEP 15  Review / Favorites                ⏳  ← SIRADAKİ ANA AŞAMA
 
 FRONTEND FOUNDATION                        ⏳
 STORE UI                                   ⏳
@@ -1136,6 +1165,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 14 — Campaign / Coupon Domain**
+> **Step 15 — Review / Favorites Domain**
 
-Bu aşamada kupon veri modeli (`coupons`, `coupon_usages`), kupon indirim tipleri (`PERCENTAGE`, `FIXED_AMOUNT`), kupon doğrulama ve indirim hesaplama REST API'leri geliştirilecektir.
+Bu aşamada ürün yorum ve puanlama veri modeli (`product_reviews`, `favorites`), doğrulanmış alışveriş kontrolü, admin yorum moderasyonu ve kullanıcı favori listesi REST API'leri geliştirilecektir.
