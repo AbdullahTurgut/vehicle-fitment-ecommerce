@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 14 — Campaign / Coupon Domain tamamlandı  
-**Sıradaki ana aşama:** Step 15 — Review / Favorites Domain  
+**Mevcut aşama:** ✅ Step 15 — Review / Favorites Domain tamamlandı (Backend Roadmap Tamamlandı)  
+**Sıradaki ana aşama:** Step 16 — Frontend Foundation & Next.js Storefront  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -650,23 +650,44 @@ Tamamlanan kampanya ve kupon özellikleri:
 
 ---
 
-# 15. Sıradaki Backend Roadmap
+# 15. Review / Favorites Domain (Tamamlandı)
 
-## ⏭ Step 15 — Review / Favorites Domain (Sıradaki Aşama)
+## ✅ Step 15 — Review / Favorites Domain (Tamamlandı)
+
+Tamamlanan ürün yorumları ve favoriler özellikleri:
+- ✅ Flyway `V16__create_review_and_favorites_schema.sql` (product_reviews ve favorites tabloları, foreign key ve indexler) ve `V17__add_updated_at_to_favorites.sql`
+- ✅ `ReviewStatus` (`PENDING`, `APPROVED`, `REJECTED`)
+- ✅ JPA entity'leri: `ProductReview.java`, `Favorite.java`
+- ✅ Repository katmanı: `ProductReviewRepository.java`, `FavoriteRepository.java`
+- ✅ DTO'lar ve Mapper'lar: `CreateReviewRequest`, `ReviewResponse`, `ProductReviewSummaryResponse`, `FavoriteResponse`, `FavoriteToggleResponse`, `ReviewMapper.java`, `FavoriteMapper.java`
+- ✅ `ReviewService.java`:
+  - `createReview`: Kullanıcı ve ürün kontrolü, mükerrer yorum engelleme, doğrulanmış alıcı (sipariş kontrolü) tespiti, onay/bekleme durumu belirleme
+  - `getProductReviews`: Ürüne ait onaylı yorumları, ortalama puanı, toplam yorum sayısını ve 1-5 yıldız dağılım istatistiğini döndürme
+  - `getAllReviews` & `updateReviewStatus`: Admin yorum onaylama/reddetme moderasyon süreçleri
+- ✅ `FavoriteService.java`:
+  - `toggleFavorite`: Kullanıcının ürün için favori ekleme/çıkarma işlemi
+  - `getUserFavorites`: Kullanıcının favori ürünlerini sayfalama ile getirme
+  - `removeFavorite`: Favori kaldırma
+- ✅ REST Controller'lar:
+  - `ReviewController.java` (`POST /api/v1/products/{productId}/reviews`, `GET /api/v1/products/{productId}/reviews`)
+  - `AdminReviewController.java` (`GET /api/v1/admin/reviews`, `PATCH /api/v1/admin/reviews/{id}/status`)
+  - `FavoriteController.java` (`POST /api/v1/favorites/{productId}`, `GET /api/v1/favorites`, `DELETE /api/v1/favorites/{productId}`)
+- ✅ Kapsamlı unit ve entegrasyon testleri (`ReviewServiceTest`, `FavoriteServiceTest`, `ReviewControllerIntegrationTest`, `FavoriteControllerIntegrationTest`, `AdminReviewControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **148 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
+
+---
+
+# 16. Sıradaki Aşama — Frontend & Entegrasyon
+
+## ⏭ Step 16 — Frontend Foundation & Storefront UI (Sıradaki Aşama)
 
 Plan:
-- Ürün yorumları ve favoriler veri modeli (`product_reviews`, `favorites`, Flyway `V16__create_review_and_favorites_schema.sql`)
-- Değerlendirme durumları (`ReviewStatus`: `PENDING`, `APPROVED`, `REJECTED`)
-- Ürün yorumlama REST API'leri:
-  - `POST /api/v1/products/{productId}/reviews` (Müşteri yorum ekleme)
-  - `GET /api/v1/products/{productId}/reviews` (Ürünün onaylanmış yorumları ve puan ortalaması)
-  - `GET /api/v1/admin/reviews` (Admin yorum onay havuzu)
-  - `PATCH /api/v1/admin/reviews/{id}/status` (Admin yorum onaylama/reddetme)
-- Favoriler REST API'leri:
-  - `POST /api/v1/favorites/{productId}` (Favoriye ekleme / çıkarma toggle)
-  - `GET /api/v1/favorites` (Kullanıcının favori ürünleri listesi)
-  - `DELETE /api/v1/favorites/{productId}` (Favoriden kaldırma)
-- Unit ve entegrasyon testleri
+- Next.js 15 App Router, TypeScript, Tailwind CSS ve shadcn/ui altyapısı
+- State yönetimi (Zustand / React Query / Server Actions)
+- API Client katmanı ve JWT token yönetimi
+- Araç seçim motoru (Yıl -> Marka -> Model -> Kasa -> Ürün listeleme akışı)
+- Ürün detay, sepet, checkout, sipariş takip, yorum ve favoriler sayfaları
+- Admin yönetim paneli (Kategori, Ürün, Araç, Sipariş, Kargo, Kupon, Yorum moderasyonu)
 
 ---
 
@@ -1148,10 +1169,10 @@ STEP 10  Checkout                          ✅
 STEP 11  Order                             ✅
 STEP 12  Payment                           ✅
 STEP 13  Shipping                          ✅
-STEP 14  Campaign / Coupon                 ✅  ← TAMAMLANDI
-STEP 15  Review / Favorites                ⏳  ← SIRADAKİ ANA AŞAMA
+STEP 14  Campaign / Coupon                 ✅
+STEP 15  Review / Favorites                ✅  ← TAMAMLANDI (Tüm Backend Domainleri Tamamlandı)
 
-FRONTEND FOUNDATION                        ⏳
+FRONTEND FOUNDATION                        ⏳  ← SIRADAKİ ANA AŞAMA
 STORE UI                                   ⏳
 ADMIN UI                                   ⏳
 FULL DOCKER STACK                          ⏳
@@ -1165,6 +1186,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 15 — Review / Favorites Domain**
+> **Step 16 — Frontend Foundation (Next.js 15, Tailwind CSS, TypeScript, Zustand, shadcn/ui)**
 
-Bu aşamada ürün yorum ve puanlama veri modeli (`product_reviews`, `favorites`), doğrulanmış alışveriş kontrolü, admin yorum moderasyonu ve kullanıcı favori listesi REST API'leri geliştirilecektir.
+Tüm backend domainleri tamamlanmış, Flyway migration'ları ve 148 adet unit/entegrasyon testi eksiksiz doğrulanmıştır. Sıradaki aşamada Next.js 15 Storefront ve Admin UI altyapısı kurulacaktır.

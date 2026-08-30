@@ -47,6 +47,12 @@ class AdminProductControllerIntegrationTest {
     private com.carmats.payment.repository.PaymentRepository paymentRepository;
 
     @Autowired
+    private com.carmats.review.repository.ProductReviewRepository reviewRepository;
+
+    @Autowired
+    private com.carmats.favorite.repository.FavoriteRepository favoriteRepository;
+
+    @Autowired
     private com.carmats.order.repository.OrderRepository orderRepository;
 
     @Autowired
@@ -54,6 +60,8 @@ class AdminProductControllerIntegrationTest {
 
     @BeforeEach
     void resetState() {
+        reviewRepository.deleteAll();
+        favoriteRepository.deleteAll();
         shipmentRepository.deleteAll();
         paymentRepository.deleteAll();
         orderRepository.deleteAll();
