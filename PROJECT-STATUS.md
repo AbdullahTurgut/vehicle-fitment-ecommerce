@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 8 — User & Address Domain tamamlandı  
-**Sıradaki ana aşama:** Step 9 — Cart Domain  
+**Mevcut aşama:** ✅ Step 9 — Cart Domain tamamlandı  
+**Sıradaki ana aşama:** Step 10 — Checkout Domain  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -513,20 +513,39 @@ Tamamlanan kullanıcı profili ve adres yönetimi özellikleri:
 
 ---
 
-# 9. Sıradaki Backend Roadmap
+# 9. Cart Domain (Tamamlandı)
 
-## ⏭ Step 9 — Cart Domain (Sıradaki Aşama)
+## ✅ Step 9 — Cart Domain (Tamamlandı)
+
+Tamamlanan sepet yönetimi özellikleri:
+- ✅ Flyway `V10__create_cart_schema.sql` (carts, cart_items tabloları, user_id ve guest_token unique indexleri, cascade yapılandırması)
+- ✅ `Cart.java` & `CartItem.java` JPA entity'leri ve `CartRepository.java`, `CartItemRepository.java`
+- ✅ `CartMapper.java`: Ürün primary görseli, araç fitment varyant bilgisi, anlık ürün erişilebilirlik ve sepet toplam hesaplamaları
+- ✅ `CartService.java` & `CartController.java`:
+  - `GET /api/v1/cart` (Misafir ve kayıtlı kullanıcı için sepet detayı, ara toplam, indirim ve genel toplam)
+  - `POST /api/v1/cart/items` (Sepete ürün ekleme, aktiflik kontrolü, stok kontrolü, araç varyant uyumluluk doğrulaması)
+  - `PUT /api/v1/cart/items/{itemId}` (Sepet kalemi adet güncelleme ve stok sınır kontrolü)
+  - `DELETE /api/v1/cart/items/{itemId}` (Sepetten tek kalem silme)
+  - `DELETE /api/v1/cart` (Sepeti tamamen temizleme)
+  - `POST /api/v1/cart/merge` (Misafir sepetini kullanıcı sepetine aktarma/birleştirme)
+- ✅ `SecurityConfig.java` üzerinde `/api/v1/cart/**` için anonim ve oturum açmış erişim desteği
+- ✅ Kapsamlı unit ve entegrasyon testleri (`CartServiceTest`, `CartControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **92 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
+
+---
+
+# 10. Sıradaki Backend Roadmap
+
+## ⏭ Step 10 — Checkout Domain (Sıradaki Aşama)
 
 Plan:
-- Sepet veri modeli (`carts`, `cart_items` tabloları ve JPA entity'leri)
-- Misafir sepeti (`sessionId` / `guestToken`) ve oturum açmış kullanıcı sepeti desteği
-- `GET /api/v1/cart` (Aktif sepeti, sepet kalemlerini, ara toplam ve toplam tutarı getirme)
-- `POST /api/v1/cart/items` (Sepete ürün ekleme, aktiflik ve stok kontrolü)
-- `PUT /api/v1/cart/items/{itemId}` (Sepetteki ürün adet güncelleme, stok sınırı kontrolü)
-- `DELETE /api/v1/cart/items/{itemId}` (Sepetten ürün çıkarma)
-- `DELETE /api/v1/cart` (Sepeti tamamen temizleme)
-- `POST /api/v1/cart/merge` (Kullanıcı giriş yaptığında misafir sepetini kullanıcı sepetine aktarma/birleştirme)
-- Sepet hesaplamaları, stok validasyonları ve entegrasyon testleri
+- Checkout başlatma ve özet REST API (`POST /api/v1/checkout/summary`, `POST /api/v1/checkout/preview`)
+- Sepet doğrulama (sepetin boş olmaması, aktif ürünler, stok yeterliliği)
+- Teslimat ve fatura adresi seçimi/doğrulaması (mevcut adres veya yeni anlık adres)
+- Kargo yöntemi ve kargo ücreti hesaplaması (ücretsiz kargo eşiği vb.)
+- Kampanya/kupon kodu uygulama desteği (ön hazırlık)
+- Nihai sipariş toplamı hesaplaması (ara toplam, kargo tutarı, indirimler, toplam tutar)
+- Checkout veri modeli ve entegrasyon testleri
 
 ---
 
@@ -1002,9 +1021,9 @@ STEP 5.5 Catalog Hardening                 ✅
 STEP 5.5.26 Compatibility Query Optimize   ✅
 STEP 6   Admin Catalog Management          ✅
 STEP 7   Authentication & Authorization    ✅
-STEP 8   User / Address                    ✅  ← TAMAMLANDI
-STEP 9   Cart                              ⏳  ← SIRADAKİ ANA AŞAMA
-STEP 10  Checkout                          ⏳
+STEP 8   User / Address                    ✅
+STEP 9   Cart                              ✅  ← TAMAMLANDI
+STEP 10  Checkout                          ⏳  ← SIRADAKİ ANA AŞAMA
 STEP 11  Order                             ⏳
 STEP 12  Payment                           ⏳
 STEP 13  Shipping                          ⏳
@@ -1025,6 +1044,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 9 — Cart Domain**
+> **Step 10 — Checkout Domain**
 
-Bu aşamada misafir (`guestId` / `guestToken`) ve oturum açmış kullanıcı sepeti yönetimi, ürün ekleme/adet güncelleme, stok doğrulama, sepet temizleme ve login sonrası sepet birleştirme (`merge`) REST API'leri geliştirilecektir.
+Bu aşamada sepet doğrulama, teslimat ve fatura adresi seçimi, kargo yöntemi ve ücret hesaplaması, ara toplam/kargo/indirim/genel toplam hesaplama REST API'leri (`/api/v1/checkout/**`) geliştirilecektir.

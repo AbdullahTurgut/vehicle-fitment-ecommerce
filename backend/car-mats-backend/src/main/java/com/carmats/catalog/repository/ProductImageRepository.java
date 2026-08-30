@@ -14,4 +14,6 @@ public interface ProductImageRepository
     findAllByProductIdOrderBySortOrderAsc(UUID productId);
 
     Optional<ProductImage> findByIdAndProductId(UUID id, UUID productId);
+
+    Optional<ProductImage> findFirstByProductIdAndPrimaryTrue(UUID productId);
 }

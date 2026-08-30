@@ -58,6 +58,8 @@ public interface ProductCompatibilityRepository
 
     Optional<ProductCompatibility> findByIdAndProductId(UUID id, UUID productId);
 
+    boolean existsByProductIdAndVehicleVariantId(UUID productId, UUID vehicleVariantId);
+
     boolean existsByProductIdAndVehicleVariantIdAndStartYearAndEndYear(
             UUID productId,
             UUID vehicleVariantId,
