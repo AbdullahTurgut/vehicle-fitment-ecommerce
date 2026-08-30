@@ -167,6 +167,10 @@ public class Product extends BaseEntity {
         return stockQuantity;
     }
 
+    public void setStockQuantity(int stockQuantity) {
+        this.stockQuantity = stockQuantity;
+    }
+
     public ProductStatus getStatus() {
         return status;
     }

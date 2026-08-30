@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 10 — Checkout Domain tamamlandı  
-**Sıradaki ana aşama:** Step 11 — Order Domain  
+**Mevcut aşama:** ✅ Step 11 — Order Domain tamamlandı  
+**Sıradaki ana aşama:** Step 12 — Payment Domain  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -555,25 +555,42 @@ Tamamlanan checkout özellikleri:
 
 ---
 
-# 11. Sıradaki Backend Roadmap
+# 11. Order Domain (Tamamlandı)
 
-## ⏭ Step 11 — Order Domain (Sıradaki Aşama)
+## ✅ Step 11 — Order Domain (Tamamlandı)
+
+Tamamlanan sipariş özellikleri:
+- ✅ Flyway `V11__create_order_schema.sql` (orders, order_items, order_addresses, order_status_history tabloları, foreign key ve indexler) ve `V12__add_updated_at_to_order_status_history.sql`
+- ✅ `OrderStatus` (`PENDING_PAYMENT`, `PAID`, `PROCESSING`, `SHIPPED`, `DELIVERED`, `CANCELLED`, `REFUNDED`) ve `OrderAddressType` (`DELIVERY`, `BILLING`)
+- ✅ JPA entity'leri: `Order.java`, `OrderItem.java`, `OrderAddress.java`, `OrderStatusHistory.java`
+- ✅ Repository katmanı: `OrderRepository.java`, `OrderItemRepository.java`, `OrderAddressRepository.java`, `OrderStatusHistoryRepository.java`
+- ✅ DTO'lar ve `OrderMapper.java`: `CreateOrderRequest`, `UpdateOrderStatusRequest`, `CustomOrderAddressDto`, `OrderItemResponse`, `OrderAddressResponse`, `OrderStatusHistoryResponse`, `OrderResponse`, `OrderSummaryResponse`
+- ✅ `OrderService.java`:
+  - `createOrder`: Sepet ürünlerini doğrulama, ürün stoklarını düşme, teslimat/fatura adres kopyaları alma, `ORD-YYYYMMDD-XXXXXX` formatında benzersiz sipariş numarası üretme, başlangıç tarihçesi ekleme ve sepeti temizleme
+  - `getUserOrders`: Kullanıcının siparişlerini sayfalı listeleme
+  - `getOrderByNumber`: Sipariş detayı ve kalem dökümü
+  - `cancelOrder`: Müşteri iptali ve stok iadesi
+  - `getAllOrders`: Admin sipariş listeleme ve durum filtresi
+  - `getAdminOrderDetail`: Admin sipariş detayı
+  - `updateOrderStatus`: Admin sipariş durumu güncelleme, durum tarihçesi notu ve iptal/iade durumunda stok restorasyonu
+- ✅ REST Controller'lar: `OrderController.java` (`/api/v1/orders/**`), `AdminOrderController.java` (`/api/v1/admin/orders/**`)
+- ✅ `SecurityConfig.java` üzerinde `/api/v1/orders/**` için anonim ve oturum açmış erişim desteği, `/api/v1/admin/orders/**` için `ROLE_ADMIN` zorunluluğu
+- ✅ Kapsamlı unit ve entegrasyon testleri (`OrderServiceTest`, `OrderControllerIntegrationTest`, `AdminOrderControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **107 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
+
+---
+
+# 12. Sıradaki Backend Roadmap
+
+## ⏭ Step 12 — Payment Domain (Sıradaki Aşama)
 
 Plan:
-- Sipariş veri modeli (`orders`, `order_items`, `order_addresses`, `order_status_history` tabloları, Flyway `V11__create_order_schema.sql`)
-- Sipariş durumları (`OrderStatus`: `PENDING_PAYMENT`, `PAID`, `PROCESSING`, `SHIPPED`, `DELIVERED`, `CANCELLED`, `REFUNDED`)
-- Sipariş oluşturma REST API (`POST /api/v1/orders`)
-  - Sepetten sipariş oluşturma (stok rezervasyonu / stok düşümü)
-  - Sipariş oluşturulduktan sonra sepetin temizlenmesi
-  - Benzersiz sipariş numarası üretimi (`ORD-YYYYMMDD-XXXXXX`)
-- Kullanıcı sipariş geçmişi ve detay API'leri:
-  - `GET /api/v1/orders` (Kullanıcının siparişleri - sayfalı)
-  - `GET /api/v1/orders/{orderNumber}` (Sipariş detay)
-  - `POST /api/v1/orders/{orderNumber}/cancel` (İptal edilebilir durumdaysa siparişi iptal etme ve stoğu iade etme)
-- Admin Sipariş Yönetimi REST API'leri:
-  - `GET /api/v1/admin/orders` (Tüm siparişleri listeleme/filtreleme)
-  - `GET /api/v1/admin/orders/{orderId}` (Admin sipariş detay)
-  - `PATCH /api/v1/admin/orders/{orderId}/status` (Sipariş durumu güncelleme ve durum tarihçesi kaydı)
+- Ödeme veri modeli (`payments`, `payment_transactions`, `payment_logs`, Flyway `V13__create_payment_schema.sql`)
+- Ödeme sağlayıcı arayüzü ve simülasyon adapter'ı (`PaymentProvider`, `IyzicoPaymentProvider` / `MockPaymentProvider`)
+- Ödeme yöntemleri (`CREDIT_CARD`, `BANK_TRANSFER`, `CASH_ON_DELIVERY`)
+- Ödeme durumları (`PaymentStatus`: `PENDING`, `SUCCESS`, `FAILED`, `CANCELLED`, `REFUNDED`)
+- Ödeme başlatma ve tamamlama REST API (`POST /api/v1/payments/initialize`, `POST /api/v1/payments/callback`, `POST /api/v1/payments/process-mock`)
+- Ödeme başarılı olduğunda sipariş durumunun `PAID` / `PROCESSING` olarak güncellenmesi
 - Unit ve entegrasyon testleri
 
 ---
@@ -1052,9 +1069,9 @@ STEP 6   Admin Catalog Management          ✅
 STEP 7   Authentication & Authorization    ✅
 STEP 8   User / Address                    ✅
 STEP 9   Cart                              ✅
-STEP 10  Checkout                          ✅  ← TAMAMLANDI
-STEP 11  Order                             ⏳  ← SIRADAKİ ANA AŞAMA
-STEP 12  Payment                           ⏳
+STEP 10  Checkout                          ✅
+STEP 11  Order                             ✅  ← TAMAMLANDI
+STEP 12  Payment                           ⏳  ← SIRADAKİ ANA AŞAMA
 STEP 13  Shipping                          ⏳
 STEP 14  Campaign / Coupon                 ⏳
 STEP 15  Review / Favorites                ⏳
@@ -1073,6 +1090,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 11 — Order Domain**
+> **Step 12 — Payment Domain**
 
-Bu aşamada sipariş veri modeli (`orders`, `order_items`, `order_addresses`, `order_status_history`), sipariş oluşturma, kullanıcı ve admin sipariş yönetimi REST API'leri geliştirilecektir.
+Bu aşamada ödeme veri modeli (`payments`, `payment_transactions`, `payment_logs`), ödeme sağlayıcı arayüzü (`PaymentProvider` / `MockPaymentProvider`), ödeme başlatma, tamamlama ve sipariş durum senkronizasyon REST API'leri geliştirilecektir.

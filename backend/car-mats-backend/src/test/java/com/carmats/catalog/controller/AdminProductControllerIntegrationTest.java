@@ -40,8 +40,17 @@ class AdminProductControllerIntegrationTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private com.carmats.order.repository.OrderRepository orderRepository;
+
+    @Autowired
+    private com.carmats.cart.repository.CartRepository cartRepository;
+
     @BeforeEach
     void resetState() {
+        orderRepository.deleteAll();
+        cartRepository.deleteAll();
+
         // Restore seeded product to pristine initial seed state
         productRepository.findById(SEEDED_PRODUCT_ID).ifPresent(p -> {
             Category cat = categoryRepository.findById(SEEDED_CATEGORY_ID).orElseThrow();
