@@ -4,7 +4,6 @@ import com.carmats.catalog.dto.response.CategoryResponse;
 import com.carmats.catalog.dto.response.ProductDetailResponse;
 import com.carmats.catalog.dto.response.ProductListResponse;
 import com.carmats.catalog.entity.Product;
-import com.carmats.catalog.entity.ProductImage;
 import com.carmats.catalog.entity.ProductStatus;
 import com.carmats.catalog.mapper.ProductMapper;
 import com.carmats.catalog.repository.CategoryRepository;
@@ -143,43 +142,8 @@ public class CatalogService {
                         year
                 )
                 .stream()
-                .map(compatibility -> compatibility.getProduct())
-                .distinct()
-                .map(this::toListResponse)
+                .map(ProductMapper::toListResponse)
                 .toList();
-    }
-
-    /*
-     * Compatible products tarafında Product entity geldiği için
-     * liste response'una dönüştürür.
-     *
-     * Not:
-     * Public products endpoint'inde projection kullanıldığı için
-     * N+1 problemi orada çözülmüş durumda.
-     */
-    private ProductListResponse toListResponse(Product product) {
-
-        String primaryImageUrl = imageRepository
-                .findAllByProductIdOrderBySortOrderAsc(product.getId())
-                .stream()
-                .filter(ProductImage::isPrimary)
-                .map(ProductImage::getUrl)
-                .findFirst()
-                .orElse(null);
-
-        return new ProductListResponse(
-                product.getId(),
-                product.getName(),
-                product.getSlug(),
-                product.getSku(),
-                product.getBasePrice(),
-                product.getSalePrice(),
-                product.getEffectivePrice(),
-                product.getStockQuantity(),
-                product.isInStock(),
-                primaryImageUrl,
-                product.isFeatured()
-        );
     }
 
     /*

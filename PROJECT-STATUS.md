@@ -5,7 +5,7 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 5.5 — Catalog Hardening tamamlandı  
+**Mevcut aşama:** ✅ Step 5.5.26 — Compatible Products Query Optimization tamamlandı  
 **Sıradaki ana aşama:** Step 6 — Admin Catalog Management  
 **Repository:** `vehicle-fitment-ecommerce`
 
@@ -418,17 +418,20 @@ Generation: 2015–2024
 
 ---
 
-# 6. Sıradaki Backend Roadmap
+## ✅ Step 5.5.26 — Compatible Products Query Optimization
 
-## ⏭ Step 5.5.26 — Compatible Products Query Optimization
-
-Amaç:
-
-- Compatibility endpoint'indeki kalan N+1 riskini kaldırmak
-- Primary image bilgisini uyumlu ürün sorgusunda doğrudan getirmek
-- Projection tabanlı compatible products sorgusuna geçmek
+Tamamlanan optimizasyonlar:
+- ✅ Compatible products akışındaki per-product N+1 görsel sorgusu tamamen kaldırıldı.
+- ✅ `ProductCompatibilityRepository.findCompatibleProducts` metodu `ProductListProjection` dönecek şekilde native query'ye refactor edildi.
+- ✅ Primary image bilgisi uyumluluk sorgusunda `LEFT JOIN product_images` ile doğrudan alındı.
+- ✅ Mevcut API davranışı, doğrulama kuralları (`INVALID_VEHICLE_YEAR`), opsiyonel model yılı desteği ve response kontratı korundu.
+- ✅ Görseli olmayan ürünlerin de response'ta hatasız şekilde listelenmesi garanti altına alındı.
+- ✅ Odaklı regression testleri eklendi (`CatalogServiceTest`, `CatalogCompatibleProductsIntegrationTest`).
+- ✅ Güncel test sonuçları: **12 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**.
 
 ---
+
+# 6. Sıradaki Backend Roadmap
 
 ## ⏭ Step 6 — Admin Catalog Management
 
@@ -1003,9 +1006,9 @@ STEP 2   PostgreSQL ER Design              ✅
 STEP 3   Backend Foundation                ✅
 STEP 4   Vehicle Domain                    ✅
 STEP 5   Catalog Domain                    ✅
-STEP 5.5 Catalog Hardening                 ✅  ← ŞU ANDA BURADAYIZ
-STEP 5.5.26 Compatibility Query Optimize   ⏭
-STEP 6   Admin Catalog Management          ⏳
+STEP 5.5 Catalog Hardening                 ✅
+STEP 5.5.26 Compatibility Query Optimize   ✅  ← TAMAMLANDI
+STEP 6   Admin Catalog Management          ⏳  ← SIRADAKİ ANA AŞAMA
 STEP 7   Authentication & Authorization    ⏳
 STEP 8   User / Address                    ⏳
 STEP 9   Cart                              ⏳
@@ -1029,10 +1032,6 @@ PRODUCTION RELEASE                         ⏳
 # 12. Sonraki Teknik Adım
 
 Bir sonraki geliştirme adımı:
-
-> **Step 5.5.26 — Compatible Products N+1 Optimization**
-
-Ardından:
 
 > **Step 6 — Admin Catalog Management**
 
