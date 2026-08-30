@@ -11,4 +11,6 @@ public interface VehicleGenerationRepository
 
     List<VehicleGeneration>
     findAllByModelIdAndActiveTrueOrderBySortOrderAscNameAsc(UUID modelId);
+
+    boolean existsByIdAndActiveTrue(UUID id);
 }

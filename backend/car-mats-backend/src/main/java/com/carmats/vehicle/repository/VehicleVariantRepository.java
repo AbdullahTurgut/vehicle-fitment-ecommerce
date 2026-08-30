@@ -13,4 +13,6 @@ public interface VehicleVariantRepository
     findAllByGenerationIdAndActiveTrueOrderBySortOrderAscNameAsc(
             UUID generationId
     );
+
+
 }

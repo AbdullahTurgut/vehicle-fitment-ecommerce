@@ -11,4 +11,6 @@ public interface VehicleModelRepository
 
     List<VehicleModel>
     findAllByBrandIdAndActiveTrueOrderBySortOrderAscNameAsc(UUID brandId);
+
+    boolean existsByIdAndActiveTrue(UUID id);
 }

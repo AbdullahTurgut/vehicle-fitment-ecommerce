@@ -10,4 +10,6 @@ public interface VehicleBrandRepository
         extends JpaRepository<VehicleBrand, UUID> {
 
     List<VehicleBrand> findAllByActiveTrueOrderBySortOrderAscNameAsc();
+
+    boolean existsByIdAndActiveTrue(UUID id);
 }
