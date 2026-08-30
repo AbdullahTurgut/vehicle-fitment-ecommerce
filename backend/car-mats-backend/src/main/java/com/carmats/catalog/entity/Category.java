@@ -40,6 +40,44 @@ public class Category extends BaseEntity {
         this.slug = slug;
     }
 
+    public Category(
+            Category parent,
+            String name,
+            String slug,
+            String description,
+            String imageUrl,
+            boolean active,
+            int sortOrder
+    ) {
+        this.parent = parent;
+        this.name = name;
+        this.slug = slug;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.active = active;
+        this.sortOrder = sortOrder;
+    }
+
+    public void update(
+            Category parent,
+            String name,
+            String slug,
+            String description,
+            String imageUrl,
+            int sortOrder
+    ) {
+        this.parent = parent;
+        this.name = name;
+        this.slug = slug;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.sortOrder = sortOrder;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public Category getParent() {
         return parent;
     }

@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 5.5.26 — Compatible Products Query Optimization tamamlandı  
-**Sıradaki ana aşama:** Step 6 — Admin Catalog Management  
+**Mevcut aşama:** ✅ Step 6.1 — Admin Category Management tamamlandı  
+**Sıradaki aşama:** Step 6.2 — Admin Product Management  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -433,7 +433,23 @@ Tamamlanan optimizasyonlar:
 
 # 6. Sıradaki Backend Roadmap
 
-## ⏭ Step 6 — Admin Catalog Management
+## ✅ Step 6.1 — Admin Category Management (Tamamlandı)
+
+Tamamlanan admin kategori yönetim endpointleri ve özellikleri:
+- ✅ `GET /api/v1/admin/categories` (Tüm aktif ve pasif kategorileri listeleme)
+- ✅ `GET /api/v1/admin/categories/{id}` (Kategori detayını ID ile getirme)
+- ✅ `POST /api/v1/admin/categories` (Yeni kategori oluşturma, slug çakışma ve parent kontrolü)
+- ✅ `PUT /api/v1/admin/categories/{id}` (Kategori bilgilerini güncelleme, self-parent engeli)
+- ✅ `PATCH /api/v1/admin/categories/{id}/status` (Kategori aktif/pasif durumunu güncelleme)
+- ✅ Otomatik ve manuel Türkçe karakter uyumlu URL slug yönetimi (`SlugUtils`)
+- ✅ Modüler servis ve controller mimarisi (`AdminCategoryController`, `AdminCategoryService`)
+- ✅ Admin DTO ve validasyon standartları (`CreateCategoryRequest`, `UpdateCategoryRequest`, `UpdateCategoryStatusRequest`, `AdminCategoryResponse`)
+- ✅ Kapsamlı unit ve entegrasyon testleri (`AdminCategoryServiceTest`, `AdminCategoryControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **31 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
+
+---
+
+## ⏭ Step 6.2 — Admin Product Management (Sıradaki Aşama)
 
 Admin tarafında SQL seed bağımlılığını kaldıracağız.
 
@@ -1007,8 +1023,9 @@ STEP 3   Backend Foundation                ✅
 STEP 4   Vehicle Domain                    ✅
 STEP 5   Catalog Domain                    ✅
 STEP 5.5 Catalog Hardening                 ✅
-STEP 5.5.26 Compatibility Query Optimize   ✅  ← TAMAMLANDI
-STEP 6   Admin Catalog Management          ⏳  ← SIRADAKİ ANA AŞAMA
+STEP 5.5.26 Compatibility Query Optimize   ✅
+STEP 6.1 Admin Category Management         ✅  ← TAMAMLANDI
+STEP 6.2 Admin Product Management          ⏳  ← SIRADAKİ AŞAMA
 STEP 7   Authentication & Authorization    ⏳
 STEP 8   User / Address                    ⏳
 STEP 9   Cart                              ⏳
@@ -1033,6 +1050,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 6 — Admin Catalog Management**
+> **Step 6.2 — Admin Product Management**
 
-Bu aşamada seed SQL ile ürün ekleme dönemi sona erecek ve ürün/kategori/uyumluluk yönetimi REST API üzerinden yapılabilir hale gelecek.
+Bu aşamada ürün oluşturma, güncelleme, durum değiştirme, görsel, özellik ve araç uyumluluk yönetimi REST API üzerinden geliştirilecektir.

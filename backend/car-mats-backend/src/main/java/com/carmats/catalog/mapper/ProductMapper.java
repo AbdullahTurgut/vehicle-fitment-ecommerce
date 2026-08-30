@@ -22,6 +22,23 @@ public final class ProductMapper {
         );
     }
 
+    public static AdminCategoryResponse toAdminCategoryResponse(
+            Category category
+    ) {
+        return new AdminCategoryResponse(
+                category.getId(),
+                category.getParent() != null ? category.getParent().getId() : null,
+                category.getName(),
+                category.getSlug(),
+                category.getDescription(),
+                category.getImageUrl(),
+                category.isActive(),
+                category.getSortOrder(),
+                category.getCreatedAt(),
+                category.getUpdatedAt()
+        );
+    }
+
     public static ProductImageResponse toImageResponse(
             ProductImage image
     ) {

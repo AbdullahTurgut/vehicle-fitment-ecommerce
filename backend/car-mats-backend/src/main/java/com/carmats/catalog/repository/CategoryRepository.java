@@ -12,7 +12,13 @@ public interface CategoryRepository
 
     List<Category> findAllByActiveTrueOrderBySortOrderAscNameAsc();
 
+    List<Category> findAllByOrderBySortOrderAscNameAsc();
+
     Optional<Category> findBySlugAndActiveTrue(String slug);
 
     boolean existsByIdAndActiveTrue(UUID id);
+
+    boolean existsBySlug(String slug);
+
+    boolean existsBySlugAndIdNot(String slug, UUID id);
 }
