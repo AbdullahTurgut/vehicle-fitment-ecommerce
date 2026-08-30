@@ -8,5 +8,12 @@ node_modules/
 .idea/
 .vscode/
 
+.next/
+out/
+build/
+dist/
+coverage/
+.turbo/
+
 *.log
 .DS_Store

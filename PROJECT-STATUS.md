@@ -1170,22 +1170,40 @@ STEP 11  Order                             ✅
 STEP 12  Payment                           ✅
 STEP 13  Shipping                          ✅
 STEP 14  Campaign / Coupon                 ✅
-STEP 15  Review / Favorites                ✅  ← TAMAMLANDI (Tüm Backend Domainleri Tamamlandı)
+STEP 15  Review / Favorites                ✅
+STEP 16  Frontend Foundation (F1 - F17)    ✅  ← TAMAMLANDI (Next.js 15 Storefront & Admin UI)
 
-FRONTEND FOUNDATION                        ⏳  ← SIRADAKİ ANA AŞAMA
-STORE UI                                   ⏳
-ADMIN UI                                   ⏳
-FULL DOCKER STACK                          ⏳
+FULL DOCKER STACK                          ⏳  ← SIRADAKİ ANA AŞAMA
 CI/CD                                      ⏳
 PRODUCTION RELEASE                         ⏳
 ```
 
 ---
 
-# 12. Sonraki Teknik Adım
+# 12. Tamamlanan Frontend Checkpointleri (F1 – F17)
+
+✅ **F1: Next.js 15 Foundation & Project Scaffolding** (Next.js 15, TypeScript, Tailwind CSS, shadcn/ui altyapısı)
+✅ **F2: Design System & Global Base Layout** (AnnouncementBar, Header, Footer, Button, Input, Card, Badge, Dialog, Sheet, Select, Skeleton)
+✅ **F3: API Client, Error Handling & TanStack Query Setup** (`apiClient`, `API_ENDPOINTS`, `QueryClientProvider`, ApiError standardı)
+✅ **F4: Authentication & Authorization Foundation** (Login `/giris-yap`, Register `/kayit-ol`, JWT in-memory + Zustand persist, misafir sepeti birleştirme)
+✅ **F5: Vehicle Fitment Selector Engine** (5 Adımlı araç seçim modalı, dinamik bağımlı sorgular, `useVehicleStore` kalıcılığı, `VehicleBar`)
+✅ **F6: Storefront Home Page** (Hero banner, hızlı araç sihirbazı, kategori kısayolları, öne çıkan ürünler grid, Neden Biz? blokları)
+✅ **F7: Catalog & Product Listing with Filters** (`/katalog`, kategori sidebar filtreleri, sıralama, sayfalama, araca uyumlu ürün filtresi)
+✅ **F8: Product Detail Page** (`/urunler/[slug]`, görsel galerisi, araç uyum kontrol paneli, teknik özellikler, müşteri yorumları & yıldız dağılımı, sepete ekleme, WhatsApp CTA)
+✅ **F9: Cart Management & Drawer** (`CartDrawer`, `/sepet`, adet güncelleme, kupon doğrulama, ücretsiz kargo ilerleme çubuğu)
+✅ **F10: Checkout & Payment Flow** (`/odeme`, adres seçimi / form, 3D Secure kredi kartı formu, sipariş oluşturma & ödeme tamamlama, `/siparis-tamamlandi/[orderNumber]`)
+✅ **F11: Customer Account & Orders** (`/hesabim/profil`, `/hesabim/adreslerim` CRUD, `/hesabim/siparislerim` iptal & takip, `/hesabim/favorilerim`)
+✅ **F12: Admin Layout, Guard & Dashboard Shell** (`/admin`, sidebar, topbar, `ROLE_ADMIN` guard, metrik kartları, son siparişler)
+✅ **F13: Admin Catalog** (`/admin/kategoriler` CRUD & aktiflik toggle, `/admin/urunler` ürün CRUD, görsel yönetimi, teknik özellik ve 5 adımlı araç varyant uyumluluk eşleştirme)
+✅ **F14: Admin Orders & Shipping Management** (`/admin/siparisler` durum filtreleme & güncelleme; `/admin/kargo` gönderi oluşturma, takip no atama, rota hareket güncellemeleri)
+✅ **F15: Admin Coupons & Review Moderation** (`/admin/kuponlar` kupon CRUD, `/admin/yorumlar` müşteri değerlendirmelerini onaylama/reddetme)
+✅ **F16: SEO Optimization, Metadata & JSON-LD** (`sitemap.ts`, `robots.ts`, `json-ld.tsx` Schema.org Product/Organization, `/siparis-takip` kargo sorgulama)
+✅ **F17: Frontend Testing & Production Build** (Vitest test suite 3/3 dosya, 9 test BAŞARILI; `next build` 23 sayfa 0 hata ile BAŞARILI derlendi)
+
+---
+
+# 13. Sonraki Teknik Adım
 
 Bir sonraki geliştirme adımı:
 
-> **Step 16 — Frontend Foundation (Next.js 15, Tailwind CSS, TypeScript, Zustand, shadcn/ui)**
-
-Tüm backend domainleri tamamlanmış, Flyway migration'ları ve 148 adet unit/entegrasyon testi eksiksiz doğrulanmıştır. Sıradaki aşamada Next.js 15 Storefront ve Admin UI altyapısı kurulacaktır.
+> **Step 17 — Full Stack Dockerization & Compose Deployment (Frontend + Backend + PostgreSQL + Nginx + Redis/MinIO)**
