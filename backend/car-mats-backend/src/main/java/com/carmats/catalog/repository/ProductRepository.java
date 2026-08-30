@@ -92,4 +92,45 @@ public interface ProductRepository
             @Param("categorySlug") String categorySlug,
             Pageable pageable
     );
+
+    boolean existsBySlug(String slug);
+
+    boolean existsBySlugAndIdNot(String slug, UUID id);
+
+    boolean existsBySku(String sku);
+
+    boolean existsBySkuAndIdNot(String sku, UUID id);
+
+    @Query(
+            value = """
+                select p
+                from Product p
+                join fetch p.category c
+                where (:categoryId is null or c.id = :categoryId)
+                  and (:status is null or p.status = :status)
+                  and (
+                        cast(:search as string) is null
+                        or lower(p.name) like lower(concat('%', cast(:search as string), '%'))
+                        or lower(p.sku) like lower(concat('%', cast(:search as string), '%'))
+                  )
+                order by p.createdAt desc
+                """,
+            countQuery = """
+                select count(p)
+                from Product p
+                where (:categoryId is null or p.category.id = :categoryId)
+                  and (:status is null or p.status = :status)
+                  and (
+                        cast(:search as string) is null
+                        or lower(p.name) like lower(concat('%', cast(:search as string), '%'))
+                        or lower(p.sku) like lower(concat('%', cast(:search as string), '%'))
+                  )
+                """
+    )
+    Page<Product> findAdminProducts(
+            @Param("search") String search,
+            @Param("categoryId") UUID categoryId,
+            @Param("status") ProductStatus status,
+            Pageable pageable
+    );
 }

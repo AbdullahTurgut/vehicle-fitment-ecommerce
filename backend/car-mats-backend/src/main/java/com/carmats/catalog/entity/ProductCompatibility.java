@@ -53,6 +53,20 @@ public class ProductCompatibility extends BaseEntity {
         this.endYear = endYear;
     }
 
+    public ProductCompatibility(
+            Product product,
+            VehicleVariant vehicleVariant,
+            Integer startYear,
+            Integer endYear,
+            String notes
+    ) {
+        this.product = product;
+        this.vehicleVariant = vehicleVariant;
+        this.startYear = startYear;
+        this.endYear = endYear;
+        this.notes = notes;
+    }
+
     public Product getProduct() {
         return product;
     }

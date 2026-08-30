@@ -36,6 +36,24 @@ public class ProductImage extends BaseEntity {
         this.primary = primary;
     }
 
+    public ProductImage(
+            Product product,
+            String url,
+            String altText,
+            int sortOrder,
+            boolean primary
+    ) {
+        this.product = product;
+        this.url = url;
+        this.altText = altText;
+        this.sortOrder = sortOrder;
+        this.primary = primary;
+    }
+
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
+    }
+
     public Product getProduct() {
         return product;
     }

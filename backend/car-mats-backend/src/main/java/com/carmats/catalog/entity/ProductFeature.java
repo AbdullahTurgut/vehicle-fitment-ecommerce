@@ -36,6 +36,20 @@ public class ProductFeature extends BaseEntity {
         this.description = description;
     }
 
+    public ProductFeature(
+            Product product,
+            String title,
+            String description,
+            String icon,
+            int sortOrder
+    ) {
+        this.product = product;
+        this.title = title;
+        this.description = description;
+        this.icon = icon;
+        this.sortOrder = sortOrder;
+    }
+
     public String getTitle() {
         return title;
     }

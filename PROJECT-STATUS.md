@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 6.1 — Admin Category Management tamamlandı  
-**Sıradaki aşama:** Step 6.2 — Admin Product Management  
+**Mevcut aşama:** ✅ Step 6 — Admin Catalog Management tamamlandı  
+**Sıradaki ana aşama:** Step 7 — Authentication & Authorization  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -431,7 +431,7 @@ Tamamlanan optimizasyonlar:
 
 ---
 
-# 6. Sıradaki Backend Roadmap
+# 6. Admin Catalog Management (Tamamlandı)
 
 ## ✅ Step 6.1 — Admin Category Management (Tamamlandı)
 
@@ -445,49 +445,42 @@ Tamamlanan admin kategori yönetim endpointleri ve özellikleri:
 - ✅ Modüler servis ve controller mimarisi (`AdminCategoryController`, `AdminCategoryService`)
 - ✅ Admin DTO ve validasyon standartları (`CreateCategoryRequest`, `UpdateCategoryRequest`, `UpdateCategoryStatusRequest`, `AdminCategoryResponse`)
 - ✅ Kapsamlı unit ve entegrasyon testleri (`AdminCategoryServiceTest`, `AdminCategoryControllerIntegrationTest`)
-- ✅ Güncel test sonuçları: **31 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
 
 ---
 
-## ⏭ Step 6.2 — Admin Product Management (Sıradaki Aşama)
+## ✅ Step 6.2 – 6.5 — Admin Product, Image, Feature & Compatibility Management (Tamamlandı)
 
-Admin tarafında SQL seed bağımlılığını kaldıracağız.
+Admin tarafında SQL seed bağımlılığı tamamen kaldırıldı ve tam CRUD/ilişki yönetimi sağlandı:
 
-Planlanan endpointler:
+Tamamlanan admin ürün ve alt kaynak yönetim endpointleri:
+- ✅ `GET /api/v1/admin/products` (Sayfalanabilir, kategori ve durum filtreli, arama destekli admin ürün listesi)
+- ✅ `GET /api/v1/admin/products/{id}` (Görselleri, özellikleri ve araç uyumlulukları ile tam ürün detayı)
+- ✅ `POST /api/v1/admin/products` (Yeni ürün oluşturma, slug/SKU tekillik kontrolü, fiyat doğrulama)
+- ✅ `PUT /api/v1/admin/products/{id}` (Ürün bilgilerini güncelleme)
+- ✅ `PATCH /api/v1/admin/products/{id}/status` (Ürün durumunu güncelleme: DRAFT, ACTIVE, PASSIVE, OUT_OF_STOCK)
+- ✅ `POST /api/v1/admin/products/{id}/images` (Ürüne görsel ekleme, birincil görsel otomatik yönetimi)
+- ✅ `DELETE /api/v1/admin/products/{id}/images/{imageId}` (Ürün görseli silme)
+- ✅ `POST /api/v1/admin/products/{id}/features` (Ürüne özellik ekleme: başlık, açıklama, ikon, sıralama)
+- ✅ `DELETE /api/v1/admin/products/{id}/features/{featureId}` (Ürün özelliği silme)
+- ✅ `POST /api/v1/admin/products/{id}/compatibilities` (Araç varyantı ve model yılı aralığı ile ürün eşleştirme, kasa yılı sınır kontrolü)
+- ✅ `DELETE /api/v1/admin/products/{id}/compatibilities/{compatibilityId}` (Araç uyumluluk kaydı silme)
+- ✅ Kapsamlı unit ve entegrasyon testleri (`AdminProductServiceTest`, `AdminProductControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **50 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
 
-```text
-POST   /api/v1/admin/categories
+---
 
-POST   /api/v1/admin/products
+# 7. Sıradaki Backend Roadmap
 
-PUT    /api/v1/admin/products/{id}
+## ⏭ Step 7 — Authentication & Authorization (Sıradaki Aşama)
 
-PATCH  /api/v1/admin/products/{id}/status
-
-POST   /api/v1/admin/products/{id}/images
-
-POST   /api/v1/admin/products/{id}/features
-
-POST   /api/v1/admin/products/{id}/compatibilities
-
-DELETE /api/v1/admin/products/{id}/compatibilities/{compatibilityId}
-```
-
-Admin ürün oluşturma akışı:
-
-```text
-Ürün oluştur
-  ↓
-Kategori seç
-  ↓
-SKU
-  ↓
-Fiyat
-  ↓
-İndirimli fiyat
-  ↓
-Stok
-  ↓
+Planlanan kimlik doğrulama ve yetkilendirme mimarisi:
+- Spring Boot 4.1.1 / Spring Security güncel standartları
+- User, Role (`ROLE_CUSTOMER`, `ROLE_ADMIN`), UserRole tabloları ve entity'leri
+- JWT tabanlı stateless authentication (`/api/v1/auth/login`, `/api/v1/auth/register`, `/api/v1/auth/refresh`)
+- Password hashing (BCrypt)
+- `/api/v1/admin/**` endpointlerinin `ROLE_ADMIN` ile korunması
+- Güvenlik filtre zinciri ve JWT Authentication Filter
+- Auth unit ve integration testleri
 Ürün açıklaması
   ↓
 Özellikler
@@ -1024,9 +1017,8 @@ STEP 4   Vehicle Domain                    ✅
 STEP 5   Catalog Domain                    ✅
 STEP 5.5 Catalog Hardening                 ✅
 STEP 5.5.26 Compatibility Query Optimize   ✅
-STEP 6.1 Admin Category Management         ✅  ← TAMAMLANDI
-STEP 6.2 Admin Product Management          ⏳  ← SIRADAKİ AŞAMA
-STEP 7   Authentication & Authorization    ⏳
+STEP 6   Admin Catalog Management          ✅  ← TAMAMLANDI
+STEP 7   Authentication & Authorization    ⏳  ← SIRADAKİ ANA AŞAMA
 STEP 8   User / Address                    ⏳
 STEP 9   Cart                              ⏳
 STEP 10  Checkout                          ⏳
@@ -1050,6 +1042,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 6.2 — Admin Product Management**
+> **Step 7 — Authentication & Authorization**
 
-Bu aşamada ürün oluşturma, güncelleme, durum değiştirme, görsel, özellik ve araç uyumluluk yönetimi REST API üzerinden geliştirilecektir.
+Bu aşamada JWT tabanlı kimlik doğrulama, `ROLE_CUSTOMER` ve `ROLE_ADMIN` rol yetkilendirmesi, şifreleme ve `/api/v1/admin/**` rotalarının yetki kontrolü geliştirilecektir.

@@ -88,4 +88,78 @@ public final class ProductMapper {
                 Boolean.TRUE.equals(projection.getFeatured())
         );
     }
+
+    public static AdminProductListResponse toAdminProductListResponse(
+            Product product,
+            String primaryImageUrl
+    ) {
+        return new AdminProductListResponse(
+                product.getId(),
+                product.getCategory().getId(),
+                product.getCategory().getName(),
+                product.getName(),
+                product.getSlug(),
+                product.getSku(),
+                product.getBasePrice(),
+                product.getSalePrice(),
+                product.getEffectivePrice(),
+                product.getStockQuantity(),
+                product.getStatus(),
+                product.isFeatured(),
+                primaryImageUrl,
+                product.getCreatedAt(),
+                product.getUpdatedAt()
+        );
+    }
+
+    public static AdminProductDetailResponse toAdminProductDetailResponse(
+            Product product,
+            List<ProductImage> images,
+            List<ProductFeature> features,
+            List<ProductCompatibility> compatibilities
+    ) {
+        return new AdminProductDetailResponse(
+                product.getId(),
+                product.getCategory().getId(),
+                product.getCategory().getName(),
+                product.getName(),
+                product.getSlug(),
+                product.getSku(),
+                product.getShortDescription(),
+                product.getDescription(),
+                product.getBasePrice(),
+                product.getSalePrice(),
+                product.getEffectivePrice(),
+                product.getStockQuantity(),
+                product.getStatus(),
+                product.isFeatured(),
+                product.getManufacturerBrand(),
+                product.getMaterial(),
+                product.getCreatedAt(),
+                product.getUpdatedAt(),
+                images.stream().map(ProductMapper::toImageResponse).toList(),
+                features.stream().map(ProductMapper::toFeatureResponse).toList(),
+                compatibilities.stream().map(ProductMapper::toAdminCompatibilityResponse).toList()
+        );
+    }
+
+    public static AdminProductCompatibilityResponse toAdminCompatibilityResponse(
+            ProductCompatibility compatibility
+    ) {
+        var variant = compatibility.getVehicleVariant();
+        var generation = variant.getGeneration();
+        var model = generation.getModel();
+        var brand = model.getBrand();
+
+        return new AdminProductCompatibilityResponse(
+                compatibility.getId(),
+                variant.getId(),
+                variant.getName(),
+                model.getName(),
+                brand.getName(),
+                compatibility.getStartYear(),
+                compatibility.getEndYear(),
+                compatibility.getNotes()
+        );
+    }
 }

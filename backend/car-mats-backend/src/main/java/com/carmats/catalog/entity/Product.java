@@ -69,6 +69,68 @@ public class Product extends BaseEntity {
         this.stockQuantity = stockQuantity;
     }
 
+    public Product(
+            Category category,
+            String name,
+            String slug,
+            String sku,
+            String shortDescription,
+            String description,
+            BigDecimal basePrice,
+            BigDecimal salePrice,
+            int stockQuantity,
+            ProductStatus status,
+            boolean featured,
+            String manufacturerBrand,
+            String material
+    ) {
+        this.category = category;
+        this.name = name;
+        this.slug = slug;
+        this.sku = sku;
+        this.shortDescription = shortDescription;
+        this.description = description;
+        this.basePrice = basePrice;
+        this.salePrice = salePrice;
+        this.stockQuantity = stockQuantity;
+        this.status = status != null ? status : ProductStatus.DRAFT;
+        this.featured = featured;
+        this.manufacturerBrand = manufacturerBrand;
+        this.material = material;
+    }
+
+    public void update(
+            Category category,
+            String name,
+            String slug,
+            String sku,
+            String shortDescription,
+            String description,
+            BigDecimal basePrice,
+            BigDecimal salePrice,
+            int stockQuantity,
+            boolean featured,
+            String manufacturerBrand,
+            String material
+    ) {
+        this.category = category;
+        this.name = name;
+        this.slug = slug;
+        this.sku = sku;
+        this.shortDescription = shortDescription;
+        this.description = description;
+        this.basePrice = basePrice;
+        this.salePrice = salePrice;
+        this.stockQuantity = stockQuantity;
+        this.featured = featured;
+        this.manufacturerBrand = manufacturerBrand;
+        this.material = material;
+    }
+
+    public void setStatus(ProductStatus status) {
+        this.status = status;
+    }
+
     public Category getCategory() {
         return category;
     }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductCompatibilityRepository
@@ -51,5 +52,16 @@ public interface ProductCompatibilityRepository
     List<ProductListProjection> findCompatibleProducts(
             @Param("variantId") UUID variantId,
             @Param("year") Integer year
+    );
+
+    List<ProductCompatibility> findAllByProductId(UUID productId);
+
+    Optional<ProductCompatibility> findByIdAndProductId(UUID id, UUID productId);
+
+    boolean existsByProductIdAndVehicleVariantIdAndStartYearAndEndYear(
+            UUID productId,
+            UUID vehicleVariantId,
+            Integer startYear,
+            Integer endYear
     );
 }
