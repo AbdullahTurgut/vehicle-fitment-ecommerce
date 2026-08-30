@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/checkout/**").permitAll()
                         .requestMatchers("/api/v1/orders/**").permitAll()
                         .requestMatchers("/api/v1/payments/**").permitAll()
+                        .requestMatchers("/api/v1/shipments/**").permitAll()
 
                         // Swagger & Actuator
                         .requestMatchers(

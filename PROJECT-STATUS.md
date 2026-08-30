@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 12 — Payment Domain tamamlandı  
-**Sıradaki ana aşama:** Step 13 — Shipping Domain  
+**Mevcut aşama:** ✅ Step 13 — Shipping Domain tamamlandı  
+**Sıradaki ana aşama:** Step 14 — Campaign / Coupon Domain  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -602,19 +602,41 @@ Tamamlanan ödeme özellikleri:
 
 ---
 
-# 13. Sıradaki Backend Roadmap
+# 13. Shipping Domain (Tamamlandı)
 
-## ⏭ Step 13 — Shipping Domain (Sıradaki Aşama)
+## ✅ Step 13 — Shipping Domain (Tamamlandı)
+
+Tamamlanan kargo ve gönderi özellikleri:
+- ✅ Flyway `V14__create_shipping_schema.sql` (shipments ve shipment_tracking_events tabloları, foreign key ve indexler)
+- ✅ `ShippingCarrier` (`YURTICI`, `ARAS`, `MNG`, `PTT`, `MOCK`) ve `ShipmentStatus` (`CREATED`, `PICKED_UP`, `IN_TRANSIT`, `OUT_FOR_DELIVERY`, `DELIVERED`, `FAILED_DELIVERY`, `RETURNED`)
+- ✅ JPA entity'leri: `Shipment.java`, `ShipmentTrackingEvent.java`
+- ✅ Repository katmanı: `ShipmentRepository.java`, `ShipmentTrackingEventRepository.java`
+- ✅ DTO'lar ve `ShipmentMapper.java`: `CreateShipmentRequest`, `UpdateShipmentStatusRequest`, `ShipmentTrackingEventResponse`, `ShipmentResponse`
+- ✅ `ShippingService.java`:
+  - `createShipment`: Sipariş teslimat adresini kopyalama, `TRK-YYYYMMDD-XXXXXX` formatında benzersiz kargo takip numarası üretme, başlangıç takip olayı oluşturma, sipariş durumunu `SHIPPED` olarak senkronize etme ve sipariş tarihçesine işleme
+  - `getShipmentByOrderNumber`: Müşterinin siparişine ait kargo ve rota hareketlerini getirme
+  - `getShipmentByTrackingNumber`: Herkese açık kargo takip no ile gönderi durumunu sorgulama
+  - `getShipmentById`: Admin kargo detay sorgulama
+  - `updateShipmentStatus`: Kargo durumu güncelleme, konum ve açıklama ile yeni takip olayı ekleme, `DELIVERED` durumunda sipariş durumunu `DELIVERED` yapma
+- ✅ REST Controller'lar:
+  - `ShippingController.java` (`GET /api/v1/shipments/orders/{orderNumber}`, `GET /api/v1/shipments/track/{trackingNumber}`)
+  - `AdminShippingController.java` (`POST /api/v1/admin/shipments`, `GET /api/v1/admin/shipments/{shipmentId}`, `PATCH /api/v1/admin/shipments/{shipmentId}/status`)
+- ✅ `SecurityConfig.java` üzerinde `/api/v1/shipments/**` için public/tracking erişim izni ve admin kargo rotaları için `ROLE_ADMIN` zorunluluğu
+- ✅ Kapsamlı unit ve entegrasyon testleri (`ShippingServiceTest`, `ShippingControllerIntegrationTest`, `AdminShippingControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **122 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
+
+---
+
+# 14. Sıradaki Backend Roadmap
+
+## ⏭ Step 14 — Campaign / Coupon Domain (Sıradaki Aşama)
 
 Plan:
-- Kargo ve gönderi veri modeli (`shipments`, `shipment_packages`, `shipment_tracking_events`, Flyway `V14__create_shipping_schema.sql`)
-- Kargo sağlayıcıları (`ShippingCarrier`: `YURTICI`, `ARAS`, `MNG`, `PTT`, `MOCK`)
-- Gönderi durumları (`ShipmentStatus`: `CREATED`, `PICKED_UP`, `IN_TRANSIT`, `OUT_FOR_DELIVERY`, `DELIVERED`, `FAILED_DELIVERY`, `RETURNED`)
-- Kargo oluşturma ve takip REST API'leri:
-  - `POST /api/v1/admin/shipments` (Admin sipariş için kargo oluşturma / kargo takip kodu üretme)
-  - `GET /api/v1/shipments/orders/{orderNumber}` (Müşteri siparişi kargo takibi)
-  - `GET /api/v1/shipments/track/{trackingNumber}` (Kargo takip no ile doğrudan sorgulama)
-  - `PATCH /api/v1/admin/shipments/{shipmentId}/status` (Kargo durumu güncelleme ve sipariş durumu `SHIPPED` / `DELIVERED` senkronizasyonu)
+- Kupon ve indirim veri modeli (`coupons`, `coupon_usages`, Flyway `V15__create_coupon_schema.sql`)
+- İndirim tipleri (`DiscountType`: `PERCENTAGE`, `FIXED_AMOUNT`)
+- Kupon kuralları: minimum sepet tutarı, kullanım limiti, başlangıç/bitiş tarihi, aktiflik durumu
+- Kupon sorgulama, doğrulama ve indirim hesaplama REST API (`POST /api/v1/coupons/validate`, `POST /api/v1/coupons/apply`)
+- Admin kupon yönetimi REST API (`POST /api/v1/admin/coupons`, `GET /api/v1/admin/coupons`, `PATCH /api/v1/admin/coupons/{id}/status`)
 - Unit ve entegrasyon testleri
 
 ---
@@ -1095,9 +1117,9 @@ STEP 8   User / Address                    ✅
 STEP 9   Cart                              ✅
 STEP 10  Checkout                          ✅
 STEP 11  Order                             ✅
-STEP 12  Payment                           ✅  ← TAMAMLANDI
-STEP 13  Shipping                          ⏳  ← SIRADAKİ ANA AŞAMA
-STEP 14  Campaign / Coupon                 ⏳
+STEP 12  Payment                           ✅
+STEP 13  Shipping                          ✅  ← TAMAMLANDI
+STEP 14  Campaign / Coupon                 ⏳  ← SIRADAKİ ANA AŞAMA
 STEP 15  Review / Favorites                ⏳
 
 FRONTEND FOUNDATION                        ⏳
@@ -1114,6 +1136,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 13 — Shipping Domain**
+> **Step 14 — Campaign / Coupon Domain**
 
-Bu aşamada kargo veri modeli (`shipments`, `shipment_packages`, `shipment_tracking_events`), kargo sağlayıcıları (`YURTICI`, `ARAS`, `MNG`, `PTT`, `MOCK`), gönderi oluşturma, kargo takip ve sipariş durumu kargo senkronizasyon REST API'leri geliştirilecektir.
+Bu aşamada kupon veri modeli (`coupons`, `coupon_usages`), kupon indirim tipleri (`PERCENTAGE`, `FIXED_AMOUNT`), kupon doğrulama ve indirim hesaplama REST API'leri geliştirilecektir.

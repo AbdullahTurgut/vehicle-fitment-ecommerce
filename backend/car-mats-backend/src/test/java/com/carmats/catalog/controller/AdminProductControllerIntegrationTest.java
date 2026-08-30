@@ -41,6 +41,9 @@ class AdminProductControllerIntegrationTest {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private com.carmats.shipping.repository.ShipmentRepository shipmentRepository;
+
+    @Autowired
     private com.carmats.payment.repository.PaymentRepository paymentRepository;
 
     @Autowired
@@ -51,6 +54,7 @@ class AdminProductControllerIntegrationTest {
 
     @BeforeEach
     void resetState() {
+        shipmentRepository.deleteAll();
         paymentRepository.deleteAll();
         orderRepository.deleteAll();
         cartRepository.deleteAll();
