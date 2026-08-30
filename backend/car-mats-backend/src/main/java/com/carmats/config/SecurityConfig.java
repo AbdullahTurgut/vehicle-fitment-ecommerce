@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/products/**").permitAll()
                         .requestMatchers("/api/v1/cart/**").permitAll()
+                        .requestMatchers("/api/v1/checkout/**").permitAll()
 
                         // Swagger & Actuator
                         .requestMatchers(

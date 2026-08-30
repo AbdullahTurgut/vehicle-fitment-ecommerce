@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 9 — Cart Domain tamamlandı  
-**Sıradaki ana aşama:** Step 10 — Checkout Domain  
+**Mevcut aşama:** ✅ Step 10 — Checkout Domain tamamlandı  
+**Sıradaki ana aşama:** Step 11 — Order Domain  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -534,18 +534,47 @@ Tamamlanan sepet yönetimi özellikleri:
 
 ---
 
-# 10. Sıradaki Backend Roadmap
+# 10. Checkout Domain (Tamamlandı)
 
-## ⏭ Step 10 — Checkout Domain (Sıradaki Aşama)
+## ✅ Step 10 — Checkout Domain (Tamamlandı)
+
+Tamamlanan checkout özellikleri:
+- ✅ `CheckoutPreviewRequest.java`, `CheckoutItemDto.java`, `CheckoutSummaryResponse.java`, `CheckoutValidationResponse.java` DTO'ları
+- ✅ `CheckoutService.java`:
+  - Sepet doğrulama (boş sepet, ürün aktiflik ve güncel stok kontrolleri)
+  - Kargo hesaplama (Ücretsiz kargo eşiği: 1.000 TL, varsayılan kargo bedeli: 75.00 TL)
+  - Dinamik toplam hesaplamaları (Ara toplam, Kargo, İndirim toplamı, Genel toplam)
+  - Teslimat ve fatura adres eşleştirme / varsayılan adres fallback mantığı
+  - Ön sipariş doğrulama kontrolü (`validateCheckout`)
+- ✅ `CheckoutController.java`:
+  - `POST /api/v1/checkout/preview` (Oturum açmış veya misafir kullanıcı için ödeme ve sipariş özeti)
+  - `POST /api/v1/checkout/validate` (Sipariş öncesi ön doğrulama)
+- ✅ `SecurityConfig.java` üzerinde `/api/v1/checkout/**` endpointlerinin anonim ve üye erişimine açılması
+- ✅ Kapsamlı unit ve entegrasyon testleri (`CheckoutServiceTest`, `CheckoutControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **99 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
+
+---
+
+# 11. Sıradaki Backend Roadmap
+
+## ⏭ Step 11 — Order Domain (Sıradaki Aşama)
 
 Plan:
-- Checkout başlatma ve özet REST API (`POST /api/v1/checkout/summary`, `POST /api/v1/checkout/preview`)
-- Sepet doğrulama (sepetin boş olmaması, aktif ürünler, stok yeterliliği)
-- Teslimat ve fatura adresi seçimi/doğrulaması (mevcut adres veya yeni anlık adres)
-- Kargo yöntemi ve kargo ücreti hesaplaması (ücretsiz kargo eşiği vb.)
-- Kampanya/kupon kodu uygulama desteği (ön hazırlık)
-- Nihai sipariş toplamı hesaplaması (ara toplam, kargo tutarı, indirimler, toplam tutar)
-- Checkout veri modeli ve entegrasyon testleri
+- Sipariş veri modeli (`orders`, `order_items`, `order_addresses`, `order_status_history` tabloları, Flyway `V11__create_order_schema.sql`)
+- Sipariş durumları (`OrderStatus`: `PENDING_PAYMENT`, `PAID`, `PROCESSING`, `SHIPPED`, `DELIVERED`, `CANCELLED`, `REFUNDED`)
+- Sipariş oluşturma REST API (`POST /api/v1/orders`)
+  - Sepetten sipariş oluşturma (stok rezervasyonu / stok düşümü)
+  - Sipariş oluşturulduktan sonra sepetin temizlenmesi
+  - Benzersiz sipariş numarası üretimi (`ORD-YYYYMMDD-XXXXXX`)
+- Kullanıcı sipariş geçmişi ve detay API'leri:
+  - `GET /api/v1/orders` (Kullanıcının siparişleri - sayfalı)
+  - `GET /api/v1/orders/{orderNumber}` (Sipariş detay)
+  - `POST /api/v1/orders/{orderNumber}/cancel` (İptal edilebilir durumdaysa siparişi iptal etme ve stoğu iade etme)
+- Admin Sipariş Yönetimi REST API'leri:
+  - `GET /api/v1/admin/orders` (Tüm siparişleri listeleme/filtreleme)
+  - `GET /api/v1/admin/orders/{orderId}` (Admin sipariş detay)
+  - `PATCH /api/v1/admin/orders/{orderId}/status` (Sipariş durumu güncelleme ve durum tarihçesi kaydı)
+- Unit ve entegrasyon testleri
 
 ---
 
@@ -1022,9 +1051,9 @@ STEP 5.5.26 Compatibility Query Optimize   ✅
 STEP 6   Admin Catalog Management          ✅
 STEP 7   Authentication & Authorization    ✅
 STEP 8   User / Address                    ✅
-STEP 9   Cart                              ✅  ← TAMAMLANDI
-STEP 10  Checkout                          ⏳  ← SIRADAKİ ANA AŞAMA
-STEP 11  Order                             ⏳
+STEP 9   Cart                              ✅
+STEP 10  Checkout                          ✅  ← TAMAMLANDI
+STEP 11  Order                             ⏳  ← SIRADAKİ ANA AŞAMA
 STEP 12  Payment                           ⏳
 STEP 13  Shipping                          ⏳
 STEP 14  Campaign / Coupon                 ⏳
@@ -1044,6 +1073,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 10 — Checkout Domain**
+> **Step 11 — Order Domain**
 
-Bu aşamada sepet doğrulama, teslimat ve fatura adresi seçimi, kargo yöntemi ve ücret hesaplaması, ara toplam/kargo/indirim/genel toplam hesaplama REST API'leri (`/api/v1/checkout/**`) geliştirilecektir.
+Bu aşamada sipariş veri modeli (`orders`, `order_items`, `order_addresses`, `order_status_history`), sipariş oluşturma, kullanıcı ve admin sipariş yönetimi REST API'leri geliştirilecektir.
