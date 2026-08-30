@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 15 — Review / Favorites Domain tamamlandı (Backend Roadmap Tamamlandı)  
-**Sıradaki ana aşama:** Step 16 — Frontend Foundation & Next.js Storefront  
+**Mevcut aşama:** ✅ Step 17 — Full Stack Dockerization & Compose Deployment tamamlandı  
+**Sıradaki ana aşama:** CI/CD & Production Hardening  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -1171,39 +1171,71 @@ STEP 12  Payment                           ✅
 STEP 13  Shipping                          ✅
 STEP 14  Campaign / Coupon                 ✅
 STEP 15  Review / Favorites                ✅
-STEP 16  Frontend Foundation (F1 - F17)    ✅  ← TAMAMLANDI (Next.js 15 Storefront & Admin UI)
+STEP 16  Frontend Foundation (F1 - F17)    ✅  (Next.js 15 Storefront & Admin UI)
+STEP 17  Full Stack Dockerization          ✅  ← TAMAMLANDI (Frontend + Backend + PostgreSQL + Nginx)
 
-FULL DOCKER STACK                          ⏳  ← SIRADAKİ ANA AŞAMA
-CI/CD                                      ⏳
-PRODUCTION RELEASE                         ⏳
+CI/CD Pipeline                             ⏳  ← SIRADAKİ ANA AŞAMA
+PRODUCTION HARDENING & RELEASE             ⏳
 ```
 
 ---
 
 # 12. Tamamlanan Frontend Checkpointleri (F1 – F17)
 
-✅ **F1: Next.js 15 Foundation & Project Scaffolding** (Next.js 15, TypeScript, Tailwind CSS, shadcn/ui altyapısı)
-✅ **F2: Design System & Global Base Layout** (AnnouncementBar, Header, Footer, Button, Input, Card, Badge, Dialog, Sheet, Select, Skeleton)
-✅ **F3: API Client, Error Handling & TanStack Query Setup** (`apiClient`, `API_ENDPOINTS`, `QueryClientProvider`, ApiError standardı)
-✅ **F4: Authentication & Authorization Foundation** (Login `/giris-yap`, Register `/kayit-ol`, JWT in-memory + Zustand persist, misafir sepeti birleştirme)
-✅ **F5: Vehicle Fitment Selector Engine** (5 Adımlı araç seçim modalı, dinamik bağımlı sorgular, `useVehicleStore` kalıcılığı, `VehicleBar`)
-✅ **F6: Storefront Home Page** (Hero banner, hızlı araç sihirbazı, kategori kısayolları, öne çıkan ürünler grid, Neden Biz? blokları)
-✅ **F7: Catalog & Product Listing with Filters** (`/katalog`, kategori sidebar filtreleri, sıralama, sayfalama, araca uyumlu ürün filtresi)
-✅ **F8: Product Detail Page** (`/urunler/[slug]`, görsel galerisi, araç uyum kontrol paneli, teknik özellikler, müşteri yorumları & yıldız dağılımı, sepete ekleme, WhatsApp CTA)
-✅ **F9: Cart Management & Drawer** (`CartDrawer`, `/sepet`, adet güncelleme, kupon doğrulama, ücretsiz kargo ilerleme çubuğu)
-✅ **F10: Checkout & Payment Flow** (`/odeme`, adres seçimi / form, 3D Secure kredi kartı formu, sipariş oluşturma & ödeme tamamlama, `/siparis-tamamlandi/[orderNumber]`)
-✅ **F11: Customer Account & Orders** (`/hesabim/profil`, `/hesabim/adreslerim` CRUD, `/hesabim/siparislerim` iptal & takip, `/hesabim/favorilerim`)
-✅ **F12: Admin Layout, Guard & Dashboard Shell** (`/admin`, sidebar, topbar, `ROLE_ADMIN` guard, metrik kartları, son siparişler)
-✅ **F13: Admin Catalog** (`/admin/kategoriler` CRUD & aktiflik toggle, `/admin/urunler` ürün CRUD, görsel yönetimi, teknik özellik ve 5 adımlı araç varyant uyumluluk eşleştirme)
-✅ **F14: Admin Orders & Shipping Management** (`/admin/siparisler` durum filtreleme & güncelleme; `/admin/kargo` gönderi oluşturma, takip no atama, rota hareket güncellemeleri)
-✅ **F15: Admin Coupons & Review Moderation** (`/admin/kuponlar` kupon CRUD, `/admin/yorumlar` müşteri değerlendirmelerini onaylama/reddetme)
-✅ **F16: SEO Optimization, Metadata & JSON-LD** (`sitemap.ts`, `robots.ts`, `json-ld.tsx` Schema.org Product/Organization, `/siparis-takip` kargo sorgulama)
-✅ **F17: Frontend Testing & Production Build** (Vitest test suite 3/3 dosya, 9 test BAŞARILI; `next build` 23 sayfa 0 hata ile BAŞARILI derlendi)
+✅ **F1: Next.js 15 Foundation & Project Scaffolding** (Next.js 15, TypeScript, Tailwind CSS, shadcn/ui altyapısı)  
+✅ **F2: Design System & Global Base Layout** (AnnouncementBar, Header, Footer, Button, Input, Card, Badge, Dialog, Sheet, Select, Skeleton)  
+✅ **F3: API Client, Error Handling & TanStack Query Setup** (`apiClient`, `API_ENDPOINTS`, `QueryClientProvider`, ApiError standardı)  
+✅ **F4: Authentication & Authorization Foundation** (Login `/giris-yap`, Register `/kayit-ol`, JWT in-memory + Zustand persist, misafir sepeti birleştirme)  
+✅ **F5: Vehicle Fitment Selector Engine** (5 Adımlı araç seçim modalı, dinamik bağımlı sorgular, `useVehicleStore` kalıcılığı, `VehicleBar`)  
+✅ **F6: Storefront Home Page** (Hero banner, hızlı araç sihirbazı, kategori kısayolları, öne çıkan ürünler grid, Neden Biz? blokları)  
+✅ **F7: Catalog & Product Listing with Filters** (`/katalog`, kategori sidebar filtreleri, sıralama, sayfalama, araca uyumlu ürün filtresi)  
+✅ **F8: Product Detail Page** (`/urunler/[slug]`, görsel galerisi, araç uyum kontrol paneli, teknik özellikler, müşteri yorumları & yıldız dağılımı, sepete ekleme, WhatsApp CTA)  
+✅ **F9: Cart Management & Drawer** (`CartDrawer`, `/sepet`, adet güncelleme, kupon doğrulama, ücretsiz kargo ilerleme çubuğu)  
+✅ **F10: Checkout & Payment Flow** (`/odeme`, adres seçimi / form, 3D Secure kredi kartı formu, sipariş oluşturma & ödeme tamamlama, `/siparis-tamamlandi/[orderNumber]`)  
+✅ **F11: Customer Account & Orders** (`/hesabim/profil`, `/hesabim/adreslerim` CRUD, `/hesabim/siparislerim` iptal & takip, `/hesabim/favorilerim`)  
+✅ **F12: Admin Layout, Guard & Dashboard Shell** (`/admin`, sidebar, topbar, `ROLE_ADMIN` guard, metrik kartları, son siparişler)  
+✅ **F13: Admin Catalog** (`/admin/kategoriler` CRUD & aktiflik toggle, `/admin/urunler` ürün CRUD, görsel yönetimi, teknik özellik ve 5 adımlı araç varyant uyumluluk eşleştirme)  
+✅ **F14: Admin Orders & Shipping Management** (`/admin/siparisler` durum filtreleme & güncelleme; `/admin/kargo` gönderi oluşturma, takip no atama, rota hareket güncellemeleri)  
+✅ **F15: Admin Coupons & Review Moderation** (`/admin/kuponlar` kupon CRUD, `/admin/yorumlar` müşteri değerlendirmelerini onaylama/reddetme)  
+✅ **F16: SEO Optimization, Metadata & JSON-LD** (`sitemap.ts`, `robots.ts`, `json-ld.tsx` Schema.org Product/Organization, `/siparis-takip` kargo sorgulama)  
+✅ **F17: Frontend Testing & Production Build** (Vitest test suite 3/3 dosya, 9 test BAŞARILI; `next build` 23 sayfa 0 hata ile BAŞARILI derlendi)  
 
 ---
 
-# 13. Sonraki Teknik Adım
+# 13. Tamamlanan Step 17 Altyapı Checkpointleri (I17.1 – I17.6)
+
+✅ **I17.1: Frontend & Backend Dockerfile Foundations**
+- `frontend/Dockerfile`: Node 22 Alpine multi-stage builder (`deps` → `builder` → `runner`), non-root `nextjs` kullanıcısı (UID 1001), Next.js standalone output desteği.
+- `backend/car-mats-backend/Dockerfile`: Eclipse Temurin Java 21 JDK builder + JRE runtime, non-root `spring` kullanıcısı (UID 1001), container JVM bellek optimizasyonları (`MaxRAMPercentage=75.0`).
+- `.dockerignore` dosyaları: build cache, node_modules, target, ve IDE artıklarını dışarıda bırakacak şekilde yapılandırıldı.
+
+✅ **I17.2: Nginx Reverse-Proxy & API Gateway**
+- `infrastructure/nginx/nginx.conf`: Upstream yük dengeleme (`frontend:3000`, `backend:8080`), `/api/` rotası Spring Boot backend'e, `/actuator/health` konservatif sağlık kontrolüne, `/_next/static/` ve `/public/` statik varlık önbelleklemesine, tüm storefront trafiği Next.js standalone sunucusuna yönlendirildi.
+- Güvenlik başlıkları: `X-Frame-Options SAMEORIGIN`, `X-Content-Type-Options nosniff`, `X-XSS-Protection`, `Referrer-Policy`.
+
+✅ **I17.3: Docker Compose & Environment Orchestration**
+- Root `docker-compose.yml`: 4 servis (`postgres:17-alpine`, `backend`, `frontend`, `nginx:1.27-alpine`), izole `carmats-network` bridge ağı, `carmats_postgres_data` kalıcı named volume.
+- Sağlık kontrolü zinciri: `postgres` (`pg_isready`) → `backend` (`/actuator/health`) → `frontend` (`127.0.0.1:3000`) → `nginx` (`127.0.0.1:80`).
+- Dış dünyaya yalnızca Nginx port 80 açıldı; PostgreSQL (5432), backend (8080) ve frontend (3000) portları iç ağda güvenli tutuldu.
+- `.env.example` temiz şablon hazırlandı.
+
+✅ **I17.4: Multi-Container Stack Build & Startup**
+- `docker compose build`: Sıfır hata ile imajlar üretildi (Backend fat JAR ve Next.js 15 standalone paketlendi).
+- `docker compose up -d`: Tüm 4 servis başarıyla ayağa kalktı ve `healthy` durumuna ulaştı.
+
+✅ **I17.5: Gateway Smoke Testing & Integration Verification**
+- Frontend Gateway: `GET http://localhost/` → `HTTP/1.1 200 OK` (Next.js SSR HTML ve security headerları doğrulandı).
+- Backend Catalog API Gateway: `GET http://localhost/api/v1/catalog/categories` → `HTTP/1.1 200 OK` (Kategori JSON verisi listelendi).
+- Backend Vehicle API Gateway: `GET http://localhost/api/v1/vehicles/brands` → `HTTP/1.1 200 OK` (Marka JSON verisi listelendi).
+- Actuator Gateway: `GET http://localhost/actuator/health` → `HTTP/1.1 200 OK` `{"status":"UP"}` (Diğer hassas actuator uçları dışarıya kapatıldı).
+- Auth API Gateway: `POST http://localhost/api/v1/auth/login` → `HTTP/1.1 401 UNAUTHORIZED` yapısal Türkçe hata yanıtı ile doğrulandı.
+- Flyway: V1–V17 tüm veritabanı migration'ları başarıyla doğrulandı ve uygulandı.
+- Test regresyonu: 148 backend testi (%100 BAŞARILI), 9 frontend testi (%100 BAŞARILI).
+
+---
+
+# 14. Sonraki Teknik Adım
 
 Bir sonraki geliştirme adımı:
 
-> **Step 17 — Full Stack Dockerization & Compose Deployment (Frontend + Backend + PostgreSQL + Nginx + Redis/MinIO)**
+> **Step 18 — CI/CD Automation, Security Hardening & Production Release Pipeline**
