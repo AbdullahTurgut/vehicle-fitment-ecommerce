@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 11 — Order Domain tamamlandı  
-**Sıradaki ana aşama:** Step 12 — Payment Domain  
+**Mevcut aşama:** ✅ Step 12 — Payment Domain tamamlandı  
+**Sıradaki ana aşama:** Step 13 — Shipping Domain  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -580,17 +580,41 @@ Tamamlanan sipariş özellikleri:
 
 ---
 
-# 12. Sıradaki Backend Roadmap
+# 12. Payment Domain (Tamamlandı)
 
-## ⏭ Step 12 — Payment Domain (Sıradaki Aşama)
+## ✅ Step 12 — Payment Domain (Tamamlandı)
+
+Tamamlanan ödeme özellikleri:
+- ✅ Flyway `V13__create_payment_schema.sql` (payments ve payment_transactions tabloları, foreign key ve indexler)
+- ✅ `PaymentMethod` (`CREDIT_CARD`, `BANK_TRANSFER`, `CASH_ON_DELIVERY`), `PaymentProviderType` (`MOCK`, `IYZICO`, `PAYTR`), `PaymentStatus` (`PENDING`, `SUCCESS`, `FAILED`, `CANCELLED`, `REFUNDED`), `PaymentTransactionType` (`PAYMENT`, `CANCEL`, `REFUND`, `CALLBACK`)
+- ✅ JPA entity'leri: `Payment.java`, `PaymentTransaction.java`
+- ✅ Repository katmanı: `PaymentRepository.java`, `PaymentTransactionRepository.java`
+- ✅ Provider arayüzü ve simülatör: `PaymentProvider.java`, `MockPaymentProvider.java`
+- ✅ DTO'lar ve `PaymentMapper.java`: `ProcessPaymentRequest`, `PaymentResponse`, `PaymentTransactionResponse`, provider DTO'ları
+- ✅ `PaymentService.java`:
+  - `processPayment`: Sipariş durumu doğrulama, kredi kartı ödemesi simülasyonu / sağlayıcı çağrısı, ödeme kaydı ve transaction loglama, başarılı ödemede sipariş durumunu `PAID` yapma ve sipariş tarihçesine işleme, kart ret durumunda `BusinessException` fırlatma ve başarısız işlem loglama
+  - `getPaymentByOrderNumber`: Siparişe ait ödeme ve işlem geçmişini sorgulama
+  - `processRefund`: Başarılı ödemeyi iade etme, `REFUND` transaction kaydı ve sipariş durumunu `REFUNDED` yapma
+- ✅ REST Controller: `PaymentController.java` (`POST /api/v1/payments/process`, `GET /api/v1/payments/orders/{orderNumber}`)
+- ✅ `SecurityConfig.java` üzerinde `/api/v1/payments/**` için checkout erişimi izni
+- ✅ Kapsamlı unit ve entegrasyon testleri (`PaymentServiceTest`, `PaymentControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **114 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
+
+---
+
+# 13. Sıradaki Backend Roadmap
+
+## ⏭ Step 13 — Shipping Domain (Sıradaki Aşama)
 
 Plan:
-- Ödeme veri modeli (`payments`, `payment_transactions`, `payment_logs`, Flyway `V13__create_payment_schema.sql`)
-- Ödeme sağlayıcı arayüzü ve simülasyon adapter'ı (`PaymentProvider`, `IyzicoPaymentProvider` / `MockPaymentProvider`)
-- Ödeme yöntemleri (`CREDIT_CARD`, `BANK_TRANSFER`, `CASH_ON_DELIVERY`)
-- Ödeme durumları (`PaymentStatus`: `PENDING`, `SUCCESS`, `FAILED`, `CANCELLED`, `REFUNDED`)
-- Ödeme başlatma ve tamamlama REST API (`POST /api/v1/payments/initialize`, `POST /api/v1/payments/callback`, `POST /api/v1/payments/process-mock`)
-- Ödeme başarılı olduğunda sipariş durumunun `PAID` / `PROCESSING` olarak güncellenmesi
+- Kargo ve gönderi veri modeli (`shipments`, `shipment_packages`, `shipment_tracking_events`, Flyway `V14__create_shipping_schema.sql`)
+- Kargo sağlayıcıları (`ShippingCarrier`: `YURTICI`, `ARAS`, `MNG`, `PTT`, `MOCK`)
+- Gönderi durumları (`ShipmentStatus`: `CREATED`, `PICKED_UP`, `IN_TRANSIT`, `OUT_FOR_DELIVERY`, `DELIVERED`, `FAILED_DELIVERY`, `RETURNED`)
+- Kargo oluşturma ve takip REST API'leri:
+  - `POST /api/v1/admin/shipments` (Admin sipariş için kargo oluşturma / kargo takip kodu üretme)
+  - `GET /api/v1/shipments/orders/{orderNumber}` (Müşteri siparişi kargo takibi)
+  - `GET /api/v1/shipments/track/{trackingNumber}` (Kargo takip no ile doğrudan sorgulama)
+  - `PATCH /api/v1/admin/shipments/{shipmentId}/status` (Kargo durumu güncelleme ve sipariş durumu `SHIPPED` / `DELIVERED` senkronizasyonu)
 - Unit ve entegrasyon testleri
 
 ---
@@ -1070,9 +1094,9 @@ STEP 7   Authentication & Authorization    ✅
 STEP 8   User / Address                    ✅
 STEP 9   Cart                              ✅
 STEP 10  Checkout                          ✅
-STEP 11  Order                             ✅  ← TAMAMLANDI
-STEP 12  Payment                           ⏳  ← SIRADAKİ ANA AŞAMA
-STEP 13  Shipping                          ⏳
+STEP 11  Order                             ✅
+STEP 12  Payment                           ✅  ← TAMAMLANDI
+STEP 13  Shipping                          ⏳  ← SIRADAKİ ANA AŞAMA
 STEP 14  Campaign / Coupon                 ⏳
 STEP 15  Review / Favorites                ⏳
 
@@ -1090,6 +1114,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 12 — Payment Domain**
+> **Step 13 — Shipping Domain**
 
-Bu aşamada ödeme veri modeli (`payments`, `payment_transactions`, `payment_logs`), ödeme sağlayıcı arayüzü (`PaymentProvider` / `MockPaymentProvider`), ödeme başlatma, tamamlama ve sipariş durum senkronizasyon REST API'leri geliştirilecektir.
+Bu aşamada kargo veri modeli (`shipments`, `shipment_packages`, `shipment_tracking_events`), kargo sağlayıcıları (`YURTICI`, `ARAS`, `MNG`, `PTT`, `MOCK`), gönderi oluşturma, kargo takip ve sipariş durumu kargo senkronizasyon REST API'leri geliştirilecektir.
