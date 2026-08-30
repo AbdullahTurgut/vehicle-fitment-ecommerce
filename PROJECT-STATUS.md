@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 7 — Authentication & Authorization tamamlandı  
-**Sıradaki ana aşama:** Step 8 — User & Address Domain  
+**Mevcut aşama:** ✅ Step 8 — User & Address Domain tamamlandı  
+**Sıradaki ana aşama:** Step 9 — Cart Domain  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -490,44 +490,43 @@ Tamamlanan kimlik doğrulama, yetkilendirme ve güvenlik özellikleri:
 
 ---
 
-# 8. Sıradaki Backend Roadmap
+# 8. User & Address Domain (Tamamlandı)
 
-## ⏭ Step 8 — User & Address Domain (Sıradaki Aşama)
+## ✅ Step 8 — User & Address Domain (Tamamlandı)
 
-Plan:
-- Kullanıcı profili güncelleme (`PUT /api/v1/users/profile`, `PATCH /api/v1/users/password`)
-- Adres entity'si (`addresses` tablosu: adres başlığı, alıcı adı/soyadı, telefon, il, ilçe, mahalle, açık adres, posta kodu, varsayılan teslimat/fatura adresi)
-- Adres yönetimi REST API (`GET /api/v1/users/addresses`, `POST /api/v1/users/addresses`, `PUT /api/v1/users/addresses/{id}`, `DELETE /api/v1/users/addresses/{id}`, `PATCH /api/v1/users/addresses/{id}/default`)
-- Adres validasyonları ve kullanıcı sahiplik kontrolü
-
----
-
-## Step 8 — User & Address Domain
-
-Plan:
-
-- Kullanıcı profili
-- Adres yönetimi
-- Varsayılan adres
-- Adres ekleme
-- Adres güncelleme
-- Adres silme
+Tamamlanan kullanıcı profili ve adres yönetimi özellikleri:
+- ✅ Flyway `V9__create_address_schema.sql` (addresses tablosu, teslimat/fatura varsayılan flagleri, foreign key ve indeksler)
+- ✅ `Address.java` JPA entity'si ve `AddressRepository.java` (kullanıcı bazlı adres sorgulama, varsayılan adres flag sıfırlama)
+- ✅ `UserService.java` & `UserController.java`:
+  - `GET /api/v1/users/profile` (Oturum açmış kullanıcının profil bilgileri)
+  - `PUT /api/v1/users/profile` (Ad, soyad, telefon güncelleme)
+  - `PATCH /api/v1/users/password` (Eski şifre doğrulaması ile şifre değiştirme)
+- ✅ `AddressService.java` & `AddressController.java`:
+  - `GET /api/v1/users/addresses` (Kullanıcının kayıtlı adres listesi)
+  - `GET /api/v1/users/addresses/{id}` (Adres detayı ve sahiplik kontrolü)
+  - `POST /api/v1/users/addresses` (Yeni adres ekleme; ilk adresi otomatik varsayılan yapma, teslimat/fatura varsayılan yönetimi)
+  - `PUT /api/v1/users/addresses/{id}` (Adres güncelleme ve sahiplik kontrolü)
+  - `DELETE /api/v1/users/addresses/{id}` (Adres silme ve sahiplik kontrolü)
+  - `PATCH /api/v1/users/addresses/{id}/default` (Varsayılan teslimat/fatura adresi belirleme)
+- ✅ Kapsamlı unit ve entegrasyon testleri (`UserServiceTest`, `AddressServiceTest`, `UserControllerIntegrationTest`, `AddressControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **83 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
 
 ---
 
-## Step 9 — Cart Domain
+# 9. Sıradaki Backend Roadmap
+
+## ⏭ Step 9 — Cart Domain (Sıradaki Aşama)
 
 Plan:
-
-- Cart
-- CartItem
-- Add to cart
-- Quantity update
-- Remove item
-- Cart total
-- Stock validation
-- Guest cart
-- Login sonrası cart merge
+- Sepet veri modeli (`carts`, `cart_items` tabloları ve JPA entity'leri)
+- Misafir sepeti (`sessionId` / `guestToken`) ve oturum açmış kullanıcı sepeti desteği
+- `GET /api/v1/cart` (Aktif sepeti, sepet kalemlerini, ara toplam ve toplam tutarı getirme)
+- `POST /api/v1/cart/items` (Sepete ürün ekleme, aktiflik ve stok kontrolü)
+- `PUT /api/v1/cart/items/{itemId}` (Sepetteki ürün adet güncelleme, stok sınırı kontrolü)
+- `DELETE /api/v1/cart/items/{itemId}` (Sepetten ürün çıkarma)
+- `DELETE /api/v1/cart` (Sepeti tamamen temizleme)
+- `POST /api/v1/cart/merge` (Kullanıcı giriş yaptığında misafir sepetini kullanıcı sepetine aktarma/birleştirme)
+- Sepet hesaplamaları, stok validasyonları ve entegrasyon testleri
 
 ---
 
@@ -1002,9 +1001,9 @@ STEP 5   Catalog Domain                    ✅
 STEP 5.5 Catalog Hardening                 ✅
 STEP 5.5.26 Compatibility Query Optimize   ✅
 STEP 6   Admin Catalog Management          ✅
-STEP 7   Authentication & Authorization    ✅  ← TAMAMLANDI
-STEP 8   User / Address                    ⏳  ← SIRADAKİ ANA AŞAMA
-STEP 9   Cart                              ⏳
+STEP 7   Authentication & Authorization    ✅
+STEP 8   User / Address                    ✅  ← TAMAMLANDI
+STEP 9   Cart                              ⏳  ← SIRADAKİ ANA AŞAMA
 STEP 10  Checkout                          ⏳
 STEP 11  Order                             ⏳
 STEP 12  Payment                           ⏳
@@ -1026,6 +1025,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 8 — User & Address Domain**
+> **Step 9 — Cart Domain**
 
-Bu aşamada kullanıcı profili güncelleme, şifre değiştirme ve çoklu teslimat/fatura adres yönetimi (`/api/v1/users/addresses/**`) REST API üzerinden geliştirilecektir.
+Bu aşamada misafir (`guestId` / `guestToken`) ve oturum açmış kullanıcı sepeti yönetimi, ürün ekleme/adet güncelleme, stok doğrulama, sepet temizleme ve login sonrası sepet birleştirme (`merge`) REST API'leri geliştirilecektir.
