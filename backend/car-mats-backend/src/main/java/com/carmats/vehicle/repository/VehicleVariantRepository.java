@@ -14,5 +14,5 @@ public interface VehicleVariantRepository
             UUID generationId
     );
 
-
+    boolean existsByIdAndActiveTrue(UUID id);
 }
