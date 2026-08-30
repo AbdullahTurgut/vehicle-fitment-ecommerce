@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 6 — Admin Catalog Management tamamlandı  
-**Sıradaki ana aşama:** Step 7 — Authentication & Authorization  
+**Mevcut aşama:** ✅ Step 7 — Authentication & Authorization tamamlandı  
+**Sıradaki ana aşama:** Step 8 — User & Address Domain  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -469,52 +469,36 @@ Tamamlanan admin ürün ve alt kaynak yönetim endpointleri:
 
 ---
 
-# 7. Sıradaki Backend Roadmap
+# 7. Authentication & Authorization (Tamamlandı)
 
-## ⏭ Step 7 — Authentication & Authorization (Sıradaki Aşama)
+## ✅ Step 7 — Authentication & Authorization (Tamamlandı)
 
-Planlanan kimlik doğrulama ve yetkilendirme mimarisi:
-- Spring Boot 4.1.1 / Spring Security güncel standartları
-- User, Role (`ROLE_CUSTOMER`, `ROLE_ADMIN`), UserRole tabloları ve entity'leri
-- JWT tabanlı stateless authentication (`/api/v1/auth/login`, `/api/v1/auth/register`, `/api/v1/auth/refresh`)
-- Password hashing (BCrypt)
-- `/api/v1/admin/**` endpointlerinin `ROLE_ADMIN` ile korunması
-- Güvenlik filtre zinciri ve JWT Authentication Filter
-- Auth unit ve integration testleri
-Ürün açıklaması
-  ↓
-Özellikler
-  ↓
-Görseller
-  ↓
-Uyumlu araç seçimi
-  ↓
-Marka → Model → Generation → Variant → Yıl Aralığı
-```
+Tamamlanan kimlik doğrulama, yetkilendirme ve güvenlik özellikleri:
+- ✅ Spring Boot 4.1.1 & Spring Security 6+ güncel standartları
+- ✅ Flyway `V8__create_user_and_auth_schema.sql` (users, roles, user_roles, refresh_tokens tabloları ve varsayılan roller / admin seed kaydı)
+- ✅ `Role.java`, `User.java`, `RefreshToken.java` JPA entity'leri ve repository'leri
+- ✅ JJWT 0.12.6 ile stateless token yönetimi (`JwtService`)
+- ✅ `POST /api/v1/auth/register` (Yeni müşteri kaydı ve otomatik token üretimi)
+- ✅ `POST /api/v1/auth/login` (E-posta ve şifre doğrulaması, access + refresh token)
+- ✅ `POST /api/v1/auth/refresh` (Refresh token rotasyonu ve yeni access token)
+- ✅ `GET /api/v1/auth/me` (Giriş yapmış kullanıcının profil ve rol bilgisi)
+- ✅ `ROLE_ADMIN` rol yetkilendirmesi ile `/api/v1/admin/**` rotalarının mutlak korunması
+- ✅ Statik ve açık uçlar (`/api/v1/public/**`, `/api/v1/vehicles/**`, `/api/v1/catalog/**`, `/swagger-ui/**`, `/actuator/**`) için `permitAll`
+- ✅ Standart JSON hata yanıtları: 401 Unauthorized (`CustomAuthenticationEntryPoint`) ve 403 Forbidden (`CustomAccessDeniedHandler`)
+- ✅ Kapsamlı unit ve entegrasyon testleri (`JwtServiceTest`, `AuthServiceTest`, `AuthControllerIntegrationTest`)
+- ✅ Güncel test sonuçları: **66 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS**
 
 ---
 
-## Step 7 — Authentication & Authorization
+# 8. Sıradaki Backend Roadmap
+
+## ⏭ Step 8 — User & Address Domain (Sıradaki Aşama)
 
 Plan:
-
-- User entity
-- Customer / Admin roller
-- Register
-- Login
-- JWT Access Token
-- Refresh Token
-- Logout
-- Password hashing
-- SecurityFilterChain
-- Public / authenticated / admin endpoint ayrımı
-
-Roller:
-
-```text
-CUSTOMER
-ADMIN
-```
+- Kullanıcı profili güncelleme (`PUT /api/v1/users/profile`, `PATCH /api/v1/users/password`)
+- Adres entity'si (`addresses` tablosu: adres başlığı, alıcı adı/soyadı, telefon, il, ilçe, mahalle, açık adres, posta kodu, varsayılan teslimat/fatura adresi)
+- Adres yönetimi REST API (`GET /api/v1/users/addresses`, `POST /api/v1/users/addresses`, `PUT /api/v1/users/addresses/{id}`, `DELETE /api/v1/users/addresses/{id}`, `PATCH /api/v1/users/addresses/{id}/default`)
+- Adres validasyonları ve kullanıcı sahiplik kontrolü
 
 ---
 
@@ -1017,9 +1001,9 @@ STEP 4   Vehicle Domain                    ✅
 STEP 5   Catalog Domain                    ✅
 STEP 5.5 Catalog Hardening                 ✅
 STEP 5.5.26 Compatibility Query Optimize   ✅
-STEP 6   Admin Catalog Management          ✅  ← TAMAMLANDI
-STEP 7   Authentication & Authorization    ⏳  ← SIRADAKİ ANA AŞAMA
-STEP 8   User / Address                    ⏳
+STEP 6   Admin Catalog Management          ✅
+STEP 7   Authentication & Authorization    ✅  ← TAMAMLANDI
+STEP 8   User / Address                    ⏳  ← SIRADAKİ ANA AŞAMA
 STEP 9   Cart                              ⏳
 STEP 10  Checkout                          ⏳
 STEP 11  Order                             ⏳
@@ -1042,6 +1026,6 @@ PRODUCTION RELEASE                         ⏳
 
 Bir sonraki geliştirme adımı:
 
-> **Step 7 — Authentication & Authorization**
+> **Step 8 — User & Address Domain**
 
-Bu aşamada JWT tabanlı kimlik doğrulama, `ROLE_CUSTOMER` ve `ROLE_ADMIN` rol yetkilendirmesi, şifreleme ve `/api/v1/admin/**` rotalarının yetki kontrolü geliştirilecektir.
+Bu aşamada kullanıcı profili güncelleme, şifre değiştirme ve çoklu teslimat/fatura adres yönetimi (`/api/v1/users/addresses/**`) REST API üzerinden geliştirilecektir.
