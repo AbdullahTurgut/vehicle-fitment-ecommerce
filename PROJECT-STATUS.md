@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 18 — CI/CD Automation, Security Hardening & Production Release Pipeline tamamlandı  
-**Sıradaki ana aşama:** Canlı Ortam Yayını / Release & Go-Live  
+**Mevcut aşama:** ✅ Step 20A — Domain-Independent Production Deployment Preparation tamamlandı (Release Candidate RC-1 Pre-Deployment Hazır)  
+**Sıradaki ana aşama:** Step 20B — Domain-Dependent Production Deployment, DNS & TLS Setup  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -1272,6 +1272,85 @@ RELEASE & GO-LIVE                          ⏳  ← SIRADAKİ ANA AŞAMA
 
 ---
 
-# 15. Sonraki Teknik Adım
+# 15. Tamamlanan Step 19 Checkpointleri (19.1 – 19.6)
 
-> **Step 19 — Production Deployment & Go-Live Preparation**
+✅ **19.1 — Category Filtering Fix & Vehicle Empty-State Safety**
+- Kategori slug uyumsuzluğu giderildi (`3d-bagaj-havuzu` ➔ `bagaj-havuzu`). Header, Footer, Katalog ve Sitemap bağlantıları eşitlendi.
+- `/katalog` sayfası URL query state senkronizasyonu (`categoryParam`, `handleCategoryChange`) sağlandı.
+- `VehicleSelectorModal`: Modeli bulunmayan markalar için mock veri uydurmak yerine kullanıcı dostu boş durum ekranı (*"Bu marka için araç verileri henüz eklenmedi."*) eklendi.
+- Vitest testleri: `catalog-filters.test.tsx` ve `vehicle-selector.test.tsx` eklendi.
+
+✅ **19.2 — Storefront UX Polish & Test Suite Genişletme**
+- Header arama formlarına (desktop ve mobil) ve katalog filtre çipleri üzerine erişilebilir `X` temizleme butonları eklendi.
+- Kırık ürün görselleri için `ImageWithFallback` bileşeni geliştirildi ve `ProductCard` / `ProductDetail` bileşenlerine entegre edildi.
+- Vitest testleri: `auth-refresh.test.ts` ve `cart-checkout.test.ts` eklendi (Frontend test sayısı: 24/24 BAŞARILI).
+
+✅ **19.3 — Database Test İzolasyonu & Transactional Rollbacks**
+- Tüm 18 Spring Boot `*IntegrationTest.java` sınıfına `@Transactional` eklendi.
+- Testlerin veritabanına bıraktığı tüm sahte ürün ve kullanıcı kayıtları temizlendi, geliştirme veritabanı kirliliği %100 önlendi.
+
+✅ **19.4 — Production Docker Network & Compose Override**
+- Ana `docker-compose.yml` dosyasından PostgreSQL `5432:5432` host port eşlemesi kaldırıldı, veritabanı internal ağa çekildi.
+- Yerel geliştirici erişimi için `docker-compose.override.yml` dosyası oluşturuldu.
+
+✅ **19.5 — CSRF & Origin Validation Koruması**
+- `OriginValidationFilter.java`: Cookie tabanlı state-changing POST isteklerinde (`/api/v1/auth/refresh`, `/api/v1/auth/logout`) `Origin`, `Referer` ve `Sec-Fetch-Site` doğrulaması uygulandı.
+- Nginx auth rate limitleri sıkılaştırıldı (`login/register` için `10r/m`, `burst=5`).
+
+✅ **19.6 — Secret-Driven Admin Bootstrap & Forward-Only Flyway V18**
+- `V18__remove_legacy_admin_seed.sql`: İlk migration'larda yer alan statik placeholder admin kaydını güvenli ve FK-sıralı şekilde temizleyen forward-only migration oluşturuldu.
+- `AdminUserInitializer.java`: İlk yönetici hesabını yalnızca veritabanında 0 admin varken ortam değişkenlerinden (`ADMIN_INITIAL_EMAIL`, `ADMIN_INITIAL_PASSWORD`) güvenli ve dinamik BCrypt ile oluşturan `ApplicationRunner` bileşeni yazıldı.
+- Üretim profilinde (`prod`) bootstrap şifresi yoksa fail-fast (`IllegalStateException`) ile durma, geliştirme modunda uyarı verme davranışı uygulandı.
+- Backend testleri: **163 test, 0 failure, 0 error — BUILD SUCCESS**.
+- Release Candidate 1 (RC-1) commit `1a7059a` üretildi ve `origin/main` ile senkronize edildi.
+
+---
+
+# 16. Tamamlanan Step 20A Checkpointleri (20A.1 – 20A.6)
+
+✅ **20A.1 — Production Configuration Templates (.env.production.template)**
+- `.env.production.template`: Üretim VPS dağıtımı için kapsamlı ortam değişkeni şablonu hazırlandı.
+- Sıfır gerçek sır kuralı uygulandı; `ADMIN_INITIAL_PASSWORD` ilk kurulumdan sonra silinmek üzere bootstrap-only olarak belgelendi.
+- `.gitignore`: Şablon dosyalarının izlenmesine izin verilirken tüm gerçek `.env` dosyaları izleme dışı bırakıldı.
+
+✅ **20A.2 — Production Docker Compose Definition (docker-compose.prod.yml)**
+- `docker-compose.prod.yml`: GHCR üzerinden değişmez (immutable) imaj etiketlerini (`${IMAGE_TAG}`) çeken bağımsız üretim compose dosyası oluşturuldu.
+- PostgreSQL, Backend ve Frontend için host portları tamamen kapatıldı (0 public port).
+- Yalnızca Nginx port 80 üzerinden kontrollü public ingress sağlandı.
+- `docker compose -f docker-compose.prod.yml config` ile tam doğrulama sağlandı.
+
+✅ **20A.3 — Production Server Scripts (deploy.sh, backup.sh, smoke-test.sh)**
+- `scripts/deploy.sh`: Preflight kontrolleri, otomatik dağıtım öncesi veritabanı yedeği, GHCR imaj çekme, rolling container başlatma, sağlık kontrolü bekleme ve smoke test çalıştırma akışını otomatikleştiren güvenli bash betiği yazıldı.
+- `scripts/backup-production.sh`: Ortam değişkenlerinden şifre okuyan, şifreyi asla loglamayan, `chmod 600` izinli ve 30 günlük otomatik rotasyonlu `pg_dump` yedekleme betiği yazıldı.
+- `scripts/smoke-test-production.sh`: Storefront, Katalog API, Actuator sağlık ve güvenlik rotalarını (404 blokajı) test eden 7 adımlı smoke test betiği geliştirildi.
+
+✅ **20A.4 — GHCR Container Image Release Pipeline**
+- `.github/workflows/release-images.yml`: Backend ve Frontend imajlarını Buildx önbelleklemesi ile derleyip `ghcr.io/abdullahturgut/vehicle-fitment-backend` ve `frontend` adreslerine yayınlayan GitHub Actions iş akışı tanımlandı.
+- Etiketleme stratejisi: `sha-<short-sha>`, semantik release tag (`v1.0.0-rc.1`) ve isteğe bağlı `latest`.
+- Manuel tetikleme (`workflow_dispatch`) ile kontrollü onay mekanizması kuruldu.
+
+✅ **20A.5 — Production Runbooks (docs/runbooks/)**
+- `docs/runbooks/production-deployment.md`: VPS gereksinimleri, dizin şeması (`/opt/carmats`, `/var/lib/carmats`, `/var/log/carmats`), izinler ve ilk kurulum adımları.
+- `docs/runbooks/backup-and-restore.md`: Crontab zamanlaması, saklama politikası ve izole ephemeral container üzerinde geri yükleme doğrulama kılavuzu.
+- `docs/runbooks/admin-bootstrap.md`: İlk admin kurulumu ve bootstrap şifresinin güvenli şekilde sistemden kaldırılma kılavuzu.
+- `docs/runbooks/rollback.md`: Değişmez SHA etiketine geri dönme ve acil durum şema kurtarma adımları.
+- `docs/runbooks/pre-domain-testing.md`: Alan adı öncesi SSH tünelleme (`ssh -L 8080:localhost:80`) ve localhost-bound özel test metodolojisi.
+
+✅ **20A.6 — Final Pre-Domain Quality Gate & RC-1 Verification**
+- Backend testleri: **163 test, 0 failure, 0 error — BUILD SUCCESS**.
+- Frontend testleri: **24 test (7 dosya), %100 BAŞARILI**.
+- Frontend derleme: **23 route, Next.js 15 standalone — BUILD SUCCESS**.
+- Compose doğrulaması: `docker-compose.yml` ve `docker-compose.prod.yml` sıfır hata ile doğrulandı.
+
+---
+
+# 17. Sonraki Teknik Adım: Step 20B — Domain-Dependent Production Deployment
+
+> **Step 20B Kapsamı (Alan Adı Alındıktan Sonra):**
+> 1. DNS A / AAAA kayıtlarının VPS IP adresine yönlendirilmesi.
+> 2. Let's Encrypt SSL/TLS sertifikasının Certbot ile üretilmesi.
+> 3. Nginx Port 443 HTTPS yapılandırması ve HTTP ➔ HTTPS 301 yönlendirmesi.
+> 4. HSTS (`Strict-Transport-Security`) güvenlik başlığının aktif edilmesi.
+> 5. HTTPS üzerinden `Secure` cookie bayrağının uçtan uca doğrulanması.
+> 6. Canlı alan adı üzerinde SEO sitemap ve OpenGraph URL'lerinin devreye alınması.
+
