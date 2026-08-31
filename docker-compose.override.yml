@@ -1,0 +1,11 @@
+# ==============================================================================
+# Docker Compose Local Development Override
+#
+# This file is automatically loaded by Docker Compose in local development.
+# In production, run: docker compose -f docker-compose.yml up -d
+# ==============================================================================
+
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
