@@ -17,3 +17,6 @@ coverage/
 
 *.log
 .DS_Store
+backups/
+*.dump
+*.sql.gz
