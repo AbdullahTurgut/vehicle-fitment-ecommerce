@@ -3,6 +3,7 @@ package com.carmats.config;
 import com.carmats.config.security.CustomAccessDeniedHandler;
 import com.carmats.config.security.CustomAuthenticationEntryPoint;
 import com.carmats.config.security.JwtAuthenticationFilter;
+import com.carmats.config.security.OriginValidationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,15 +22,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OriginValidationFilter originValidationFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
+            OriginValidationFilter originValidationFilter,
             CustomAuthenticationEntryPoint authenticationEntryPoint,
             CustomAccessDeniedHandler accessDeniedHandler
     ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.originValidationFilter = originValidationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
     }
@@ -76,6 +80,7 @@ public class SecurityConfig {
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(originValidationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
