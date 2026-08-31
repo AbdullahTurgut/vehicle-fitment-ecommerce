@@ -9,6 +9,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-carmats_db}
       POSTGRES_USER: ${POSTGRES_USER:-carmats}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-carmats_dev}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - carmats_postgres_data:/var/lib/postgresql/data
     networks:
@@ -21,6 +23,11 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # 2. Spring Boot 4.1.1 Backend REST API
   backend:
@@ -51,6 +58,11 @@ services:
       timeout: 5s
       retries: 6
       start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # 3. Next.js 15 App Router Frontend
   frontend:
@@ -79,6 +91,11 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # 4. Nginx Reverse Proxy / API Gateway
   nginx:
@@ -102,6 +119,11 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   carmats-network:
