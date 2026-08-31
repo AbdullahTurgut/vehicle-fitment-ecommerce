@@ -1,6 +1,8 @@
 .env
 .env.*
 !.env.example
+!.env.production.template
+!.env.template
 
 target/
 node_modules/
