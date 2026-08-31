@@ -5,8 +5,8 @@
 ## Genel Durum
 
 **Proje durumu:** Aktif geliştirme  
-**Mevcut aşama:** ✅ Step 17 — Full Stack Dockerization & Compose Deployment tamamlandı  
-**Sıradaki ana aşama:** CI/CD & Production Hardening  
+**Mevcut aşama:** ✅ Step 18 — CI/CD Automation, Security Hardening & Production Release Pipeline tamamlandı  
+**Sıradaki ana aşama:** Canlı Ortam Yayını / Release & Go-Live  
 **Repository:** `vehicle-fitment-ecommerce`
 
 ---
@@ -1172,10 +1172,10 @@ STEP 13  Shipping                          ✅
 STEP 14  Campaign / Coupon                 ✅
 STEP 15  Review / Favorites                ✅
 STEP 16  Frontend Foundation (F1 - F17)    ✅  (Next.js 15 Storefront & Admin UI)
-STEP 17  Full Stack Dockerization          ✅  ← TAMAMLANDI (Frontend + Backend + PostgreSQL + Nginx)
+STEP 17  Full Stack Dockerization          ✅  (Frontend + Backend + PostgreSQL + Nginx)
+STEP 18  CI/CD & Production Hardening      ✅  ← TAMAMLANDI (18.1 - 18.7)
 
-CI/CD Pipeline                             ⏳  ← SIRADAKİ ANA AŞAMA
-PRODUCTION HARDENING & RELEASE             ⏳
+RELEASE & GO-LIVE                          ⏳  ← SIRADAKİ ANA AŞAMA
 ```
 
 ---
@@ -1216,11 +1216,10 @@ PRODUCTION HARDENING & RELEASE             ⏳
 ✅ **I17.3: Docker Compose & Environment Orchestration**
 - Root `docker-compose.yml`: 4 servis (`postgres:17-alpine`, `backend`, `frontend`, `nginx:1.27-alpine`), izole `carmats-network` bridge ağı, `carmats_postgres_data` kalıcı named volume.
 - Sağlık kontrolü zinciri: `postgres` (`pg_isready`) → `backend` (`/actuator/health`) → `frontend` (`127.0.0.1:3000`) → `nginx` (`127.0.0.1:80`).
-- Dış dünyaya yalnızca Nginx port 80 açıldı; PostgreSQL (5432), backend (8080) ve frontend (3000) portları iç ağda güvenli tutuldu.
 - `.env.example` temiz şablon hazırlandı.
 
 ✅ **I17.4: Multi-Container Stack Build & Startup**
-- `docker compose build`: Sıfır hata ile imajlar üretildi (Backend fat JAR ve Next.js 15 standalone paketlendi).
+- `docker compose build`: Sıfır hata ile imajlar üretildi.
 - `docker compose up -d`: Tüm 4 servis başarıyla ayağa kalktı ve `healthy` durumuna ulaştı.
 
 ✅ **I17.5: Gateway Smoke Testing & Integration Verification**
@@ -1228,14 +1227,51 @@ PRODUCTION HARDENING & RELEASE             ⏳
 - Backend Catalog API Gateway: `GET http://localhost/api/v1/catalog/categories` → `HTTP/1.1 200 OK` (Kategori JSON verisi listelendi).
 - Backend Vehicle API Gateway: `GET http://localhost/api/v1/vehicles/brands` → `HTTP/1.1 200 OK` (Marka JSON verisi listelendi).
 - Actuator Gateway: `GET http://localhost/actuator/health` → `HTTP/1.1 200 OK` `{"status":"UP"}` (Diğer hassas actuator uçları dışarıya kapatıldı).
-- Auth API Gateway: `POST http://localhost/api/v1/auth/login` → `HTTP/1.1 401 UNAUTHORIZED` yapısal Türkçe hata yanıtı ile doğrulandı.
 - Flyway: V1–V17 tüm veritabanı migration'ları başarıyla doğrulandı ve uygulandı.
 - Test regresyonu: 148 backend testi (%100 BAŞARILI), 9 frontend testi (%100 BAŞARILI).
 
 ---
 
-# 14. Sonraki Teknik Adım
+# 14. Tamamlanan Step 18 Checkpointleri (18.1 – 18.7)
 
-Bir sonraki geliştirme adımı:
+✅ **18.1 — Multi-Job GitHub Actions CI Pipeline**
+- `.github/workflows/ci.yml`: `backend-ci` (JDK 21, PostgreSQL 17 test servisi, Maven clean test & package), `frontend-ci` (Node 22, npm ci, Vitest test suite, Next.js 15 production build), `docker-ci` (Docker compose config ve container build doğrulama).
 
-> **Step 18 — CI/CD Automation, Security Hardening & Production Release Pipeline**
+✅ **18.2 — Auth Security Hardening**
+- HttpOnly refresh cookie (`carmats_refresh_token`) rotasyonu ve sunucu tarafı iptal/revoke yönetimi.
+- Frontend access token in-memory Zustand store yönetimi (`localStorage` token sızıntıları engellendi).
+- Güvenli 401 interceptor ve otomatik token yenileme sırası (`subscribeTokenRefresh`).
+
+✅ **18.3 — Spring Production Security Hardening**
+- Swagger/OpenAPI UI ve API-docs `application-prod.yml` üzerinde prod profilinde tamamen kapatıldı.
+- `OpenApiConfig.java`: JWT Bearer Authentication şeması ve API meta verileri tanımlandı.
+- `JwtService.java`: Prod profilinde varsayılan / zayıf JWT secret kullanımına karşı fail-fast doğrulama (`IllegalStateException`).
+- Actuator endpointleri en aza indirildi (`health, info`), detay gösterimi prod ortamında kapatıldı.
+
+✅ **18.4 — Nginx Gateway & Rate Limiting Hardening**
+- Hedefli rate limiting bölgeleri: Auth (`5r/s`, `burst=10`), Ödeme (`3r/s`, `burst=5`), Genel API (`30r/s`, `burst=20`).
+- Güvenli HTTP yanıt başlıkları: `X-Frame-Options SAMEORIGIN`, `X-Content-Type-Options nosniff`, `X-XSS-Protection`, `Referrer-Policy strict-origin-when-cross-origin`, `Permissions-Policy`.
+- `server_tokens off;` ile sunucu sürüm gizleme.
+- Hassas Actuator endpointlerine dışarıdan doğrudan erişim 404 ile engellendi.
+
+✅ **18.5 — Logging, Correlation ID & Docker Log Rotation**
+- `CorrelationIdFilter.java`: `X-Request-ID` yayılımı, MDC `requestId` kaydı ve otomatik temizleme, milisaniye cinsinden HTTP istek/yanıt süresi ve IP loglama.
+- Konsol log formatına `[%X{requestId}]` eklendi.
+- Nginx loglarına `$request_time` ve `$request_id` dahil edildi.
+- `docker-compose.yml`: Tüm servisler için `json-file` log rotation (`max-size: 10m`, `max-file: 3`) yapılandırıldı.
+
+✅ **18.6 — Database Backup & Safe Restore Automation**
+- `scripts/backup-db.ps1` & `scripts/backup-db.sh`: Ortam değişkenlerinden güvenli kimlik doğrulama, salt-okunur `pg_dump` yedeği, `backups/` gitignored dizininde saklama.
+- `scripts/restore-verify-db.ps1` & `scripts/restore-verify-db.sh`: Yalnızca geçici ve izole ephemeral PostgreSQL container'ında geri yükleme ve şema bütünlüğü doğrulama (aktif veritabanına ve Docker volume'lerine sıfır temas).
+
+✅ **18.7 — Production Readiness Verification**
+- Backend testleri: **159 test, 0 failure, 0 error, 0 skipped — BUILD SUCCESS**.
+- Frontend testleri: **9 test (3 dosya), %100 BAŞARILI**.
+- Frontend derleme: **23 route, Next.js 15 standalone — BUILD SUCCESS**.
+- Nginx & Compose Smoke testleri: `/`, `/api/v1/catalog/categories`, `/actuator/health`, Auth login/refresh/logout tam akış doğrulandı.
+
+---
+
+# 15. Sonraki Teknik Adım
+
+> **Step 19 — Production Deployment & Go-Live Preparation**
