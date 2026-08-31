@@ -3,6 +3,9 @@ package com.carmats.config.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -15,12 +18,40 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
+    public static final String DEFAULT_DEV_SECRET = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
+
     private final JwtProperties jwtProperties;
     private final SecretKey signingKey;
 
     public JwtService(JwtProperties jwtProperties) {
+        this(jwtProperties, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public JwtService(JwtProperties jwtProperties, @Nullable Environment environment) {
         this.jwtProperties = jwtProperties;
-        byte[] keyBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
+        String secret = jwtProperties.getSecret();
+
+        boolean isProd = environment != null && (
+                environment.acceptsProfiles(Profiles.of("prod")) ||
+                Arrays.asList(environment.getActiveProfiles()).contains("prod")
+        );
+
+        if (isProd) {
+            if (secret == null || secret.isBlank() || DEFAULT_DEV_SECRET.equals(secret.trim())) {
+                throw new IllegalStateException(
+                        "PRODUCTION SECURITY ERROR: Default or empty JWT secret is forbidden in production profile. " +
+                        "Please configure a strong, unique JWT_SECRET environment variable."
+                );
+            }
+            if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+                throw new IllegalStateException(
+                        "PRODUCTION SECURITY ERROR: JWT secret must be at least 256 bits (32 bytes) in production profile."
+                );
+            }
+        }
+
+        byte[] keyBytes = (secret != null ? secret : DEFAULT_DEV_SECRET).getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < 32) {
             // Pad or hash to ensure 256-bit key
             byte[] padded = new byte[32];

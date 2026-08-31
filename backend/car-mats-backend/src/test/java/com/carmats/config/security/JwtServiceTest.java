@@ -68,4 +68,45 @@ class JwtServiceTest {
 
         assertThat(jwtService.isTokenValid(token, user2)).isFalse();
     }
+
+    @Test
+    @DisplayName("Should throw IllegalStateException in production if default secret is used")
+    void shouldThrowInProductionIfDefaultSecretUsed() {
+        org.springframework.mock.env.MockEnvironment prodEnv = new org.springframework.mock.env.MockEnvironment();
+        prodEnv.setActiveProfiles("prod");
+
+        JwtProperties prodProps = new JwtProperties();
+        prodProps.setSecret(JwtService.DEFAULT_DEV_SECRET);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> new JwtService(prodProps, prodEnv))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Default or empty JWT secret is forbidden in production profile");
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalStateException in production if secret is too short")
+    void shouldThrowInProductionIfSecretTooShort() {
+        org.springframework.mock.env.MockEnvironment prodEnv = new org.springframework.mock.env.MockEnvironment();
+        prodEnv.setActiveProfiles("prod");
+
+        JwtProperties prodProps = new JwtProperties();
+        prodProps.setSecret("short-secret");
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> new JwtService(prodProps, prodEnv))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("must be at least 256 bits");
+    }
+
+    @Test
+    @DisplayName("Should succeed in production when strong secret is provided")
+    void shouldSucceedInProductionWithStrongSecret() {
+        org.springframework.mock.env.MockEnvironment prodEnv = new org.springframework.mock.env.MockEnvironment();
+        prodEnv.setActiveProfiles("prod");
+
+        JwtProperties prodProps = new JwtProperties();
+        prodProps.setSecret("very-strong-production-custom-secret-key-that-is-at-least-32-bytes-long");
+
+        JwtService prodJwtService = new JwtService(prodProps, prodEnv);
+        assertThat(prodJwtService).isNotNull();
+    }
 }
