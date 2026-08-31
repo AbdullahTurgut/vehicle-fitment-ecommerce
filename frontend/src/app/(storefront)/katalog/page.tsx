@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { catalogApi } from "@/features/catalog/catalog-api";
 import { useVehicleStore } from "@/stores/vehicle-store";
@@ -19,13 +19,13 @@ import {
 } from "lucide-react";
 
 function CatalogContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category") || "";
-  const initialVariantId = searchParams.get("variantId") || "";
-  const initialYear = searchParams.get("year") ? Number(searchParams.get("year")) : undefined;
-  const initialSearch = searchParams.get("search") || "";
+  const categoryParam = searchParams.get("category") || "";
+  const variantIdParam = searchParams.get("variantId") || "";
+  const yearParam = searchParams.get("year") ? Number(searchParams.get("year")) : undefined;
+  const searchParam = searchParams.get("search") || "";
 
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [sortBy, setSortBy] = useState<string>("featured");
 
@@ -38,8 +38,8 @@ function CatalogContent() {
   });
 
   // Effective variantId (from URL param or selectedVehicle in Zustand)
-  const effectiveVariantId = initialVariantId || selectedVehicle?.variant?.id;
-  const effectiveYear = initialYear || selectedVehicle?.year;
+  const effectiveVariantId = variantIdParam || selectedVehicle?.variant?.id;
+  const effectiveYear = yearParam || selectedVehicle?.year;
 
   // Query 1: If searching or generic listing
   const {
@@ -48,14 +48,14 @@ function CatalogContent() {
   } = useQuery({
     queryKey: [
       "catalog-products",
-      selectedCategory,
+      categoryParam,
       currentPage,
-      initialSearch,
+      searchParam,
       sortBy,
     ],
     queryFn: () =>
       catalogApi.getProducts({
-        category: selectedCategory || undefined,
+        category: categoryParam || undefined,
         page: currentPage,
         size: 12,
       }),
@@ -79,11 +79,35 @@ function CatalogContent() {
   const isFitmentActive = !!effectiveVariantId;
   const isLoading = isFitmentActive ? loadingCompatible : loadingProducts;
 
+  const handleCategoryChange = (slug: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (slug) {
+      params.set("category", slug);
+    } else {
+      params.delete("category");
+    }
+    params.delete("page");
+    setCurrentPage(0);
+    const query = params.toString();
+    router.push(query ? `/katalog?${query}` : "/katalog");
+  };
+
   // Filter & sort products
   let displayProducts = isFitmentActive ? [...compatibleProducts] : [...(productPage?.content || [])];
 
-  if (initialSearch) {
-    const q = initialSearch.toLowerCase();
+  if (isFitmentActive && categoryParam) {
+    displayProducts = displayProducts.filter((p) => {
+      if (categoryParam === "3d-oto-paspas") {
+        return p.slug.includes("paspas") || p.name.toLowerCase().includes("paspas");
+      } else if (categoryParam === "bagaj-havuzu") {
+        return p.slug.includes("bagaj") || p.name.toLowerCase().includes("bagaj");
+      }
+      return true;
+    });
+  }
+
+  if (searchParam) {
+    const q = searchParam.toLowerCase();
     displayProducts = displayProducts.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
@@ -108,10 +132,10 @@ function CatalogContent() {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
             {isFitmentActive
               ? "Aracınıza Özel Uyumlu Ürünler"
-              : selectedCategory
-              ? categories.find((c) => c.slug === selectedCategory)?.name || "Kategori Ürünleri"
-              : initialSearch
-              ? `"${initialSearch}" Arama Sonuçları`
+              : categoryParam
+              ? categories.find((c) => c.slug === categoryParam)?.name || "Kategori Ürünleri"
+              : searchParam
+              ? `"${searchParam}" Arama Sonuçları`
               : "Tüm Ürünler"}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
@@ -209,12 +233,9 @@ function CatalogContent() {
 
             <div className="space-y-1">
               <button
-                onClick={() => {
-                  setSelectedCategory("");
-                  setCurrentPage(0);
-                }}
+                onClick={() => handleCategoryChange("")}
                 className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
-                  selectedCategory === ""
+                  categoryParam === ""
                     ? "bg-accent-orange text-white font-semibold shadow-sm"
                     : "text-slate-700 hover:bg-slate-100"
                 }`}
@@ -231,12 +252,9 @@ function CatalogContent() {
                 categories.map((cat) => (
                   <button
                     key={cat.id}
-                    onClick={() => {
-                      setSelectedCategory(cat.slug);
-                      setCurrentPage(0);
-                    }}
+                    onClick={() => handleCategoryChange(cat.slug)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
-                      selectedCategory === cat.slug
+                      categoryParam === cat.slug
                         ? "bg-accent-orange text-white font-semibold shadow-sm"
                         : "text-slate-700 hover:bg-slate-100"
                     }`}
@@ -281,10 +299,7 @@ function CatalogContent() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  setSelectedCategory("");
-                  setCurrentPage(0);
-                }}
+                onClick={() => handleCategoryChange("")}
               >
                 Filtreleri Temizle
               </Button>

@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/katalog?category=3d-bagaj-havuzu`,
+      url: `${baseUrl}/katalog?category=bagaj-havuzu`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,

@@ -264,7 +264,7 @@ export default function HomePage() {
 
           {/* 3D Bagaj Havuzu */}
           <Link
-            href="/katalog?category=3d-bagaj-havuzu"
+            href="/katalog?category=bagaj-havuzu"
             className="group relative overflow-hidden rounded-3xl border bg-gradient-to-br from-slate-800 to-slate-900 p-8 text-white shadow-md hover:shadow-2xl transition-all duration-300"
           >
             <div className="space-y-3 relative z-10">

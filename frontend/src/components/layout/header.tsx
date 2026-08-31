@@ -237,7 +237,7 @@ export function Header() {
           <Link href="/katalog?category=3d-oto-paspas" className="hover:text-accent-orange transition-colors">
             3D Havuzlu Paspas
           </Link>
-          <Link href="/katalog?category=3d-bagaj-havuzu" className="hover:text-accent-orange transition-colors">
+          <Link href="/katalog?category=bagaj-havuzu" className="hover:text-accent-orange transition-colors">
             3D Bagaj Havuzu
           </Link>
           <Link href="/siparis-takip" className="hover:text-accent-orange transition-colors ml-auto text-slate-500 text-xs">
@@ -288,7 +288,7 @@ export function Header() {
               3D Havuzlu Paspas
             </Link>
             <Link
-              href="/katalog?category=3d-bagaj-havuzu"
+              href="/katalog?category=bagaj-havuzu"
               onClick={() => setIsMobileMenuOpen(false)}
               className="block py-2 text-slate-800 hover:text-accent-orange"
             >

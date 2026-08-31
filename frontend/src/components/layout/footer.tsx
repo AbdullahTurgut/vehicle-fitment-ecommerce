@@ -98,7 +98,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/katalog?category=3d-bagaj-havuzu" className="hover:text-white transition-colors">
+                <Link href="/katalog?category=bagaj-havuzu" className="hover:text-white transition-colors">
                   3D Bagaj Havuzu
                 </Link>
               </li>

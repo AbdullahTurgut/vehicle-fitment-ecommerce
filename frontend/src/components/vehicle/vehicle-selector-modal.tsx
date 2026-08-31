@@ -206,6 +206,24 @@ export function VehicleSelectorModal() {
                     <div key={i} className="h-12 bg-muted animate-pulse rounded-lg" />
                   ))}
                 </div>
+              ) : models.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center space-y-3 bg-slate-50">
+                  <Car className="w-8 h-8 text-muted-foreground mx-auto" />
+                  <p className="text-sm font-semibold text-slate-800">
+                    Bu marka için araç verileri henüz eklenmedi.
+                  </p>
+                  <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                    Yeni model ve kasa uyumlulukları yakında sisteme dahil edilecektir.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedBrand(null)}
+                    className="mt-2"
+                  >
+                    Farklı Bir Marka Seç
+                  </Button>
+                </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   {models.map((model) => (
@@ -242,6 +260,21 @@ export function VehicleSelectorModal() {
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />
                   ))}
+                </div>
+              ) : generations.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center space-y-3 bg-slate-50">
+                  <Car className="w-8 h-8 text-muted-foreground mx-auto" />
+                  <p className="text-sm font-semibold text-slate-800">
+                    Bu model için kasa/jenerasyon verisi henüz eklenmedi.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedModel(null)}
+                    className="mt-2"
+                  >
+                    Farklı Bir Model Seç
+                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
