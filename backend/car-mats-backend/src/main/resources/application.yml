@@ -37,6 +37,13 @@ security:
     access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:86400000} # 24 hours
     refresh-token-expiration-ms: ${JWT_REFRESH_TOKEN_EXPIRATION_MS:604800000} # 7 days
 
+admin:
+  initial:
+    email: ${ADMIN_INITIAL_EMAIL:admin@carmats.local}
+    password: ${ADMIN_INITIAL_PASSWORD:}
+    first-name: ${ADMIN_INITIAL_FIRST_NAME:Admin}
+    last-name: ${ADMIN_INITIAL_LAST_NAME:Sistem}
+
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%15.15t] [%X{requestId:-}] %-40.40logger{39} : %m%n"
