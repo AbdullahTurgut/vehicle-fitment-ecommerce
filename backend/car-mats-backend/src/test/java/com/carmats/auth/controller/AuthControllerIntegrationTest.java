@@ -219,6 +219,118 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("POST /api/v1/auth/login sets HttpOnly refresh token cookie")
+    void shouldSetHttpOnlyCookieOnLogin() throws Exception {
+        String requestJson = """
+                {
+                    "email": "admin@carmats.local",
+                    "password": "Admin123!"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists("carmats_refresh_token"))
+                .andExpect(cookie().httpOnly("carmats_refresh_token", true))
+                .andExpect(cookie().path("carmats_refresh_token", "/api/v1/auth"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/refresh works with HttpOnly cookie alone")
+    void shouldRefreshWithCookieAlone() throws Exception {
+        String loginJson = """
+                {
+                    "email": "admin@carmats.local",
+                    "password": "Admin123!"
+                }
+                """;
+
+        var loginResult = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        jakarta.servlet.http.Cookie refreshCookie = loginResult.getResponse().getCookie("carmats_refresh_token");
+        org.junit.jupiter.api.Assertions.assertNotNull(refreshCookie);
+
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                        .cookie(refreshCookie)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken", notNullValue()))
+                .andExpect(cookie().exists("carmats_refresh_token"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/logout revokes refresh token and clears cookie")
+    void shouldLogoutAndRevokeRefreshToken() throws Exception {
+        String loginJson = """
+                {
+                    "email": "admin@carmats.local",
+                    "password": "Admin123!"
+                }
+                """;
+
+        var loginResult = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        jakarta.servlet.http.Cookie refreshCookie = loginResult.getResponse().getCookie("carmats_refresh_token");
+        org.junit.jupiter.api.Assertions.assertNotNull(refreshCookie);
+
+        // Logout
+        mockMvc.perform(post("/api/v1/auth/logout")
+                        .cookie(refreshCookie)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent())
+                .andExpect(cookie().maxAge("carmats_refresh_token", 0));
+
+        // Refresh with revoked token should now fail
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                        .cookie(refreshCookie)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is("INVALID_REFRESH_TOKEN")));
+    }
+
+    @Test
+    @DisplayName("Using rotated refresh token a second time fails")
+    void shouldFailWhenReusingRotatedToken() throws Exception {
+        String loginJson = """
+                {
+                    "email": "admin@carmats.local",
+                    "password": "Admin123!"
+                }
+                """;
+
+        var loginResult = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        jakarta.servlet.http.Cookie originalCookie = loginResult.getResponse().getCookie("carmats_refresh_token");
+
+        // First refresh succeeds (and revokes original)
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                        .cookie(originalCookie)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        // Reusing original revoked token fails
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                        .cookie(originalCookie)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is("INVALID_REFRESH_TOKEN")));
+    }
+
+    @Test
     @DisplayName("Protected admin endpoint returns 200 when admin token is provided")
     void shouldReturn200OnAdminWithAdminToken() throws Exception {
         String token = jwtService.generateAccessToken(

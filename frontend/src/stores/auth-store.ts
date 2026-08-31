@@ -22,10 +22,6 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setAuth: (response) => {
-        if (typeof window !== "undefined") {
-          localStorage.setItem("carmats_access_token", response.accessToken);
-          localStorage.setItem("carmats_refresh_token", response.refreshToken);
-        }
         set({
           user: response.user,
           accessToken: response.accessToken,
@@ -58,13 +54,10 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "carmats_auth_storage",
+      name: "carmats_user_profile",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
-        isAuthenticated: state.isAuthenticated,
       }),
     }
   )

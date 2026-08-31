@@ -108,7 +108,19 @@ public class AuthService {
     }
 
     public AuthResponse refreshToken(RefreshTokenRequest request) {
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenWithUser(request.refreshToken())
+        String token = request != null ? request.refreshToken() : null;
+        return refreshToken(token);
+    }
+
+    public AuthResponse refreshToken(String rawToken) {
+        if (rawToken == null || rawToken.isBlank()) {
+            throw new BusinessException(
+                    "INVALID_REFRESH_TOKEN",
+                    "Geçersiz veya süresi dolmuş refresh token."
+            );
+        }
+
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenWithUser(rawToken)
                 .orElseThrow(() ->
                         new BusinessException(
                                 "INVALID_REFRESH_TOKEN",
@@ -134,6 +146,13 @@ public class AuthService {
         refreshToken.revoke();
 
         return createAuthResponse(user);
+    }
+
+    public void logout(String rawRefreshToken) {
+        if (rawRefreshToken != null && !rawRefreshToken.isBlank()) {
+            refreshTokenRepository.findByToken(rawRefreshToken)
+                    .ifPresent(RefreshToken::revoke);
+        }
     }
 
     @Transactional(readOnly = true)

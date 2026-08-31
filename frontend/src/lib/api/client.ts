@@ -1,8 +1,10 @@
-import { ApiErrorResponse } from "@/types";
+import { ApiErrorResponse, AuthResponse } from "@/types";
+import { useAuthStore } from "@/stores/auth-store";
 
 export interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined | null>;
   skipAuth?: boolean;
+  _retry?: boolean;
 }
 
 export class ApiError extends Error {
@@ -19,15 +21,6 @@ export class ApiError extends Error {
   }
 }
 
-function getStoredAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return localStorage.getItem("carmats_access_token");
-  } catch {
-    return null;
-  }
-}
-
 function getStoredGuestToken(): string | null {
   if (typeof window === "undefined") return null;
   try {
@@ -41,8 +34,17 @@ export function buildUrl(
   path: string,
   params?: Record<string, string | number | boolean | undefined | null>
 ): string {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
-  const url = new URL(path.startsWith("http") ? path : `${baseUrl}${path}`);
+  const configuredBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  let baseUrl: string;
+  if (configuredBaseUrl !== undefined && configuredBaseUrl !== null && configuredBaseUrl !== "") {
+    baseUrl = configuredBaseUrl;
+  } else if (typeof window !== "undefined") {
+    baseUrl = window.location.origin;
+  } else {
+    baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:8080";
+  }
+
+  const url = new URL(path.startsWith("http") ? path : `${baseUrl}${path.startsWith("/") ? "" : "/"}${path}`);
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -53,6 +55,18 @@ export function buildUrl(
   }
 
   return url.toString();
+}
+
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function subscribeTokenRefresh(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
 }
 
 export async function apiClient<T>(
@@ -66,9 +80,9 @@ export async function apiClient<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  // Add JWT Token if available and not skipped
+  // Add JWT Token from Zustand in-memory store if available and not skipped
   if (!options.skipAuth) {
-    const token = getStoredAccessToken();
+    const token = useAuthStore.getState().accessToken;
     if (token && !headers.has("Authorization")) {
       headers.set("Authorization", `Bearer ${token}`);
     }
@@ -82,12 +96,53 @@ export async function apiClient<T>(
 
   try {
     const response = await fetch(url, {
+      credentials: "same-origin",
       ...options,
       headers,
     });
 
     if (response.status === 204) {
       return {} as T;
+    }
+
+    // Handle 401 Unauthorized for authenticated endpoints
+    if (response.status === 401 && !options.skipAuth && !options._retry && !endpoint.includes("/auth/login") && !endpoint.includes("/auth/refresh")) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
+          const refreshUrl = buildUrl("/api/v1/auth/refresh");
+          const refreshRes = await fetch(refreshUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+          });
+
+          if (refreshRes.ok) {
+            const authData: AuthResponse = await refreshRes.json();
+            useAuthStore.getState().setAuth(authData);
+            isRefreshing = false;
+            onRefreshed(authData.accessToken);
+            return apiClient<T>(endpoint, { ...options, _retry: true });
+          } else {
+            isRefreshing = false;
+            useAuthStore.getState().logout();
+          }
+        } catch {
+          isRefreshing = false;
+          useAuthStore.getState().logout();
+        }
+      } else {
+        // Wait for token refresh to complete
+        return new Promise<T>((resolve, reject) => {
+          subscribeTokenRefresh((newToken) => {
+            const retryHeaders = new Headers(options.headers || {});
+            retryHeaders.set("Authorization", `Bearer ${newToken}`);
+            apiClient<T>(endpoint, { ...options, headers: retryHeaders, _retry: true })
+              .then(resolve)
+              .catch(reject);
+          });
+        });
+      }
     }
 
     if (!response.ok) {

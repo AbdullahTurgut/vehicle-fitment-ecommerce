@@ -157,6 +157,30 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw BusinessException when refreshing revoked token")
+    void shouldThrowWhenRefreshingRevokedToken() {
+        RefreshToken refreshToken = new RefreshToken(testUser, "revoked-token", LocalDateTime.now().plusDays(7));
+        refreshToken.revoke();
+
+        when(refreshTokenRepository.findByTokenWithUser("revoked-token")).thenReturn(Optional.of(refreshToken));
+
+        assertThatThrownBy(() -> authService.refreshToken("revoked-token"))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("code", "INVALID_REFRESH_TOKEN");
+    }
+
+    @Test
+    @DisplayName("Should logout and revoke token successfully")
+    void shouldLogoutSuccessfully() {
+        RefreshToken refreshToken = new RefreshToken(testUser, "active-token", LocalDateTime.now().plusDays(7));
+        when(refreshTokenRepository.findByToken("active-token")).thenReturn(Optional.of(refreshToken));
+
+        authService.logout("active-token");
+
+        assertThat(refreshToken.isRevoked()).isTrue();
+    }
+
+    @Test
     @DisplayName("Should get current user by id")
     void shouldGetCurrentUser() {
         UUID userId = UUID.randomUUID();
