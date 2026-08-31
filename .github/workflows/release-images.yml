@@ -1,0 +1,108 @@
+name: Release Container Images to GHCR
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Semantic Release Tag (e.g. v1.0.0-rc.1)'
+        required: false
+        default: ''
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE_NAME: ${{ github.repository_owner }}/vehicle-fitment-backend
+  FRONTEND_IMAGE_NAME: ${{ github.repository_owner }}/vehicle-fitment-frontend
+
+jobs:
+  build-and-push:
+    name: Build and Publish Immutable Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Compute Short SHA and Release Tags
+        id: vars
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+          
+          # Determine semantic tag from inputs or git ref
+          if [ -n "${{ github.event.inputs.release_tag }}" ]; then
+            echo "release_tag=${{ github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "release_tag=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          else
+            echo "release_tag=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata (Backend)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}
+          tags: |
+            type=raw,value=sha-${{ steps.vars.outputs.short_sha }}
+            type=raw,value=${{ steps.vars.outputs.release_tag }},enable=${{ steps.vars.outputs.release_tag != '' }}
+            type=raw,value=latest
+
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/car-mats-backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract Docker Metadata (Frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}
+          tags: |
+            type=raw,value=sha-${{ steps.vars.outputs.short_sha }}
+            type=raw,value=${{ steps.vars.outputs.release_tag }},enable=${{ steps.vars.outputs.release_tag != '' }}
+            type=raw,value=latest
+
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Summary Report
+        run: |
+          echo "### Immutable Images Published to GHCR" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend:** \`${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:sha-${{ steps.vars.outputs.short_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend:** \`${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:sha-${{ steps.vars.outputs.short_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ steps.vars.outputs.release_tag }}" ]; then
+            echo "- **Release Tag:** \`${{ steps.vars.outputs.release_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
