@@ -67,12 +67,22 @@ export function Header() {
               placeholder="Araç marka, model veya ürün ara... (Örn: Passat B8, Bagaj Havuzu)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-11 pr-24 rounded-full border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-transparent transition-all"
+              className="w-full h-11 pl-11 pr-28 rounded-full border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-transparent transition-all"
             />
             <Search className="w-4 h-4 text-muted-foreground absolute left-4 pointer-events-none" />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-16 p-1 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
+                title="Aramayı Temizle"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
             <button
               type="submit"
-              className="absolute right-1.5 px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors"
+              className="absolute right-1.5 px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Ara
             </button>
@@ -256,9 +266,19 @@ export function Header() {
               placeholder="Ürün veya araç ara..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 text-sm"
+              className="w-full h-10 pl-10 pr-10 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange"
             />
-            <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-3 pointer-events-none" />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-2.5 p-0.5 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
+                title="Aramayı Temizle"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </form>
 
           <button

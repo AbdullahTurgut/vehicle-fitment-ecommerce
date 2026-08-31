@@ -16,6 +16,7 @@ import {
   Sparkles,
   Layers,
   ShoppingBag,
+  X,
 } from "lucide-react";
 
 function CatalogContent() {
@@ -162,6 +163,48 @@ function CatalogContent() {
           </select>
         </div>
       </div>
+
+      {/* Active Search / Category Chips */}
+      {(searchParam || categoryParam) && (
+        <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+          {searchParam && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 shadow-xs">
+              <span>Arama: &ldquo;{searchParam}&rdquo;</span>
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.delete("search");
+                  params.delete("page");
+                  const q = params.toString();
+                  router.push(q ? `/katalog?${q}` : "/katalog");
+                }}
+                className="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 cursor-pointer"
+                title="Aramayı Temizle"
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
+            </span>
+          )}
+          {categoryParam && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200 text-xs font-semibold text-accent-orange shadow-xs">
+              <span>Kategori: {categories.find((c) => c.slug === categoryParam)?.name || categoryParam}</span>
+              <button
+                onClick={() => handleCategoryChange("")}
+                className="w-4 h-4 rounded-full bg-orange-200 hover:bg-orange-300 flex items-center justify-center text-orange-700 cursor-pointer"
+                title="Kategori Filtresini Kaldır"
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
+            </span>
+          )}
+          <button
+            onClick={() => router.push("/katalog")}
+            className="text-xs text-muted-foreground hover:text-slate-900 underline ml-2 cursor-pointer font-medium"
+          >
+            Tüm Filtreleri Temizle
+          </button>
+        </div>
+      )}
 
       {/* FITMENT NOTICE BANNER */}
       {isFitmentActive ? (

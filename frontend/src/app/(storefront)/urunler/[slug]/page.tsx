@@ -10,6 +10,7 @@ import { useVehicleStore } from "@/stores/vehicle-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import {
   Dialog,
   DialogContent,
@@ -178,21 +179,12 @@ export default function ProductDetailPage({
         {/* Left: Image Gallery (5 cols) */}
         <div className="lg:col-span-6 space-y-4">
           <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden bg-slate-50 border shadow-sm">
-            {currentImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={currentImage}
-                alt={product.name}
-                className="w-full h-full object-cover object-center transition-all duration-300"
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
-                <ShoppingCart className="w-16 h-16 stroke-[1.5]" />
-                <span className="text-xs font-medium text-slate-400 mt-2">
-                  Görsel Yakında Eklenecek
-                </span>
-              </div>
-            )}
+            <ImageWithFallback
+              src={currentImage}
+              alt={product.name}
+              fallbackText="Görsel Yakında Eklenecek"
+              className="w-full h-full object-cover object-center transition-all duration-300"
+            />
 
             {/* Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10">

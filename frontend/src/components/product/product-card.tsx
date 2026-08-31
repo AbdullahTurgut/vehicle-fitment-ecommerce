@@ -12,6 +12,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useState } from "react";
 
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+
 interface ProductCardProps {
   product: ProductList;
   isCompatible?: boolean;
@@ -63,19 +65,11 @@ export function ProductCard({ product, isCompatible = false }: ProductCardProps)
       {/* Product Image Container */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-50 border-b">
         <Link href={`/urunler/${product.slug}`} className="w-full h-full block">
-          {product.primaryImageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={product.primaryImageUrl}
-              alt={product.name}
-              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
-              <ShoppingCart className="w-12 h-12 stroke-[1.5]" />
-              <span className="text-[11px] font-medium text-slate-400 mt-2">Görsel Yakında</span>
-            </div>
-          )}
+          <ImageWithFallback
+            src={product.primaryImageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+          />
         </Link>
 
         {/* Badges Overlay */}
